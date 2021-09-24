@@ -43,9 +43,15 @@ variable "subnets" {
 }
 
 variable "vm_size" {
-  description = "Size of the VM"
-  type        = string
-  default     = "Standard_D16s_v4" # 16 Cores and 64 GB of RAM
+  description = "Size of the VMs"
+  type = object({
+    cassandra = string
+    opennms   = string
+  })
+  default = {
+    cassandra = "Standard_D16s_v4" # 16 Cores and 64 GB of RAM
+    opennms   = "Standard_D8s_v4"  #  8 Cores and 32 GB of RAM
+  }
 }
 
 # Must be consistent with the chosen Location/Region
@@ -107,7 +113,23 @@ variable "cassandra_settings" {
     newts_keyspace         = "newts"
     compaction_window_size = 7
     compaction_window_unit = "DAYS"
-    expired_sstable_check  = 86400 # Check frequency in Minutes
+    expired_sstable_check  = 86400
     gc_grace_seconds       = 604800
+  }
+}
+
+variable "opennms_settings" {
+  description = "OpenNMS settings"
+  type = object({
+    newts_ttl            = number
+    newts_resource_shard = number
+    ring_buffer_size     = number
+    cache_max_entries    = number
+  })
+  default ={
+    newts_ttl            = 31540000
+    newts_resource_shard = 604800
+    ring_buffer_size     = 2097152
+    cache_max_entries    = 1000000
   }
 }
