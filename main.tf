@@ -38,21 +38,23 @@ resource "azurerm_public_ip" "opennms" {
 }
 
 resource "azurerm_network_interface" "opennms" {
-  name                = "${local.onms_vm_name}-nic"
+  count               = length(azurerm_subnet.main)
+  name                = "${local.onms_vm_name}-nic${count.index}"
   location            = var.location
   resource_group_name = var.resource_group
   tags                = local.required_tags
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = azurerm_subnet.main[0].id
-    public_ip_address_id          = azurerm_public_ip.opennms.id
+    subnet_id                     = azurerm_subnet.main[count.index].id
+    public_ip_address_id          = count.index == 0 ? azurerm_public_ip.opennms.id : null
     private_ip_address_allocation = "Dynamic"
   }
 }
 
 resource "azurerm_network_interface_security_group_association" "opennms" {
-  network_interface_id      = azurerm_network_interface.opennms.id
+  count                     = length(azurerm_subnet.main)
+  network_interface_id      = azurerm_network_interface.opennms[count.index].id
   network_security_group_id = azurerm_network_security_group.opennms.id
 }
 
@@ -91,7 +93,7 @@ resource "azurerm_linux_virtual_machine" "opennms" {
   size                  = var.vm_size.opennms
   admin_username        = var.user
   custom_data           = data.template_cloudinit_config.opennms.rendered
-  network_interface_ids = [ azurerm_network_interface.opennms.id ]
+  network_interface_ids = azurerm_network_interface.opennms[*].id
   tags                  = local.required_tags
 
   admin_ssh_key {
