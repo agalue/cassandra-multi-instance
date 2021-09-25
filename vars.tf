@@ -1,6 +1,6 @@
 
 variable "user" {
-  description = "User to access VMs and prefix for Azure resources"
+  description = "User to access VMs and name prefix for Azure resources"
   type        = string
   default     = "agalue"
 }
@@ -29,10 +29,10 @@ variable "address_space" {
   default     = "14.0.0.0/16"
 }
 
-# Must exist within the address_space of the chosen virtual network
-# Each Cassandra instance on each VM should live on a different subnet (because of Azure)
+# Each subnet CIDR must exist within the address_space of the chosen virtual network (address_space).
+# Due to how routing in Azure works, each Cassandra instance on each VM should live on a different subnet.
 variable "subnets" {
-  description = "Subnet Ranges for each Cassandra instance"
+  description = "Subnet ranges for each Cassandra instance; the size determines the number of NICs per VM"
   type        = list(string)
   default     = [
     "14.0.1.0/24",
@@ -72,13 +72,13 @@ variable "os_image" {
 }
 
 variable "num_vms" {
-  description = "Number of Cassandra Servers"
+  description = "Number of Cassandra Servers in the cluster"
   type        = number
   default     = 3
 }
 
 variable "num_instances" {
-  description = "Number of Cassandra Instances per Server (>= available subnets)"
+  description = "Number of Cassandra Instances per Server; must be less or equal to the available subnets."
   type        = number
   default     = 3
 }
@@ -95,7 +95,6 @@ variable "cassandra_settings" {
     num_tokens             = number
     replication_factor     = number
     newts_keyspace         = string
-    # For the newts.samples table
     compaction_window_size = number
     compaction_window_unit = string
     expired_sstable_check  = number
@@ -111,6 +110,7 @@ variable "cassandra_settings" {
     num_tokens             = 16
     replication_factor     = 2
     newts_keyspace         = "newts"
+    # TWCS settings for the newts.samples table
     compaction_window_size = 7
     compaction_window_unit = "DAYS"
     expired_sstable_check  = 86400

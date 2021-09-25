@@ -1,3 +1,8 @@
+locals {
+  # To guarantee the existence of the group if it has to be created 
+  resource_group = var.resource_group_create ? azurerm_resource_group.main[0].name : var.resource_group
+}
+
 resource "azurerm_resource_group" "main" {
   count    = var.resource_group_create ? 1 : 0
   name     = var.resource_group
@@ -24,7 +29,7 @@ resource "azurerm_subnet" "main" {
 resource "azurerm_network_security_group" "main" {
   name                = "${var.user}-cassandra-sg"
   location            = var.location
-  resource_group_name = var.resource_group
+  resource_group_name = local.resource_group
   tags                = local.required_tags
 
   security_rule {

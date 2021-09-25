@@ -1,6 +1,5 @@
 
 locals {
-  resource_group = var.resource_group_create ? azurerm_resource_group.main[0].name : var.resource_group
   seed_node = cidrhost(azurerm_subnet.main[0].address_prefixes[0], 10) # First instance on first VM
   onms_vm_name = "${var.user}-onmscas1"
   required_tags = {
@@ -30,7 +29,7 @@ module "cassandra" {
 resource "azurerm_public_ip" "opennms" {
   name                = "${local.onms_vm_name}-public-ip"
   location            = var.location
-  resource_group_name = var.resource_group
+  resource_group_name = local.resource_group
   tags                = local.required_tags
   domain_name_label   = local.onms_vm_name
   allocation_method   = "Dynamic"
@@ -41,7 +40,7 @@ resource "azurerm_network_interface" "opennms" {
   count               = length(azurerm_subnet.main)
   name                = "${local.onms_vm_name}-nic${count.index}"
   location            = var.location
-  resource_group_name = var.resource_group
+  resource_group_name = local.resource_group
   tags                = local.required_tags
 
   ip_configuration {
@@ -88,7 +87,7 @@ data "template_cloudinit_config" "opennms" {
 
 resource "azurerm_linux_virtual_machine" "opennms" {
   name                  = local.onms_vm_name
-  resource_group_name   = var.resource_group
+  resource_group_name   = local.resource_group
   location              = var.location
   size                  = var.vm_size.opennms
   admin_username        = var.user
