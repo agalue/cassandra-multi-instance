@@ -514,6 +514,12 @@ write_files:
         sed -r -i 's/step="300"/step="30"/g' $f
       fi
     done
+    # Wait for Cassandra
+    until echo -n >/dev/tcp/${cassandra_seed}/9042 2>/dev/null; do
+      printf '.'
+      sleep 10
+    done
+    echo "done"
     # Start OpenNMS
     /opt/opennms/bin/runjava -s
     /opt/opennms/bin/install -dis

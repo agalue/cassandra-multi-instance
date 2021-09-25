@@ -22,7 +22,11 @@ This recipe shows one way to solve this problem:
 
 5) Based on the latest RPMs for Apache Cassandra, the only file that has to be modified from the installed files is `/usr/share/cassandra/cassandra.in.sh`, but that should not be a problem when upgrading the application.
 
+6) Each instance within the same VM would have its own JMX port, as, unlike the client port, it binds to all the interfaces. For example, instance one listens on 7199, instance two on 7299, and so on.
+
 We added a customized keyspace for OpenNMS/Newts designed for Multi-DC in mind (but for rack-awareness in our use case) using TWCS for the compaction strategy, the recommended configuration for production.
+
+The latest version of OpenNMS Horizon will be started on a VM with PostgreSQL 12 on the same instance and all the necessary changes to monitor Cassandra with the multi-instance architecture in mind, which differs from the traditional method from a JMX perspective.
 
 ## Installation and usage
 
@@ -59,7 +63,9 @@ terraform apply \
   -var "location=eastus"
 ```
 
-* Wait for the Cassandra cluster to be ready. Each Cassandra instance is added one per rack at a time (as only one node can be joining a cluster at any given time). Use `nodetool` to make sure all the 9 instances have joined the cluster:
+* Each Cassandra instance is started one per rack at a time (as only one node can be joining a cluster at any given time) because the order is important. Before starting each instance, the script that controls the bootstrap process ensures that previous instances are ready for a smooth sequence minimizing the probability of initialization errors.
+
+You could use `nodetool` to track joining progress and to make sure all the 9 instances have joined the cluster:
 
 ```bash
 nodetool -u cassandra -pw cassandra status
@@ -96,6 +102,30 @@ UN  14.0.3.32  69.87 KiB  16      20.7%             d1b09b8e-bb61-4d58-b09f-9e92
 UN  14.0.3.12  69.87 KiB  16      25.9%             6aaa99e1-56e5-403d-9d1f-e9ab32a52bc5  Rack1
 UN  14.0.2.31  74.84 KiB  16      19.9%             be8a18d7-a9e5-420f-a403-3f0f14fbdae9  Rack3
 ```
+
+* The OpenNMS instance will wait only for the seed node to be ready before starting, so we recommend waiting until the whole cluster is ready before monitoring the infrastructure.
+
+* Import the requisition to collect JMX metrics from OpenNMS and the Cassandra servers every 30 seconds.
+
+```bash
+/opt/opennms/bin/provision.pl requisition import Infrastructure
+```
+
+* Connect to the Karaf Shell through SSH, ensuring the session won't die. Still, it is recommended to use `tmux` or `screen` if you're planning to leave the stress tool running constantly.
+
+```bash
+ssh -o ServerAliveInterval=10 -p 8101 admin@localhost
+```
+
+* Execute the `opennms:stress-metrics` command. The following is an example to generate 100000 samples per second:
+
+```bash
+opennms:stress-metrics -r 60 -n 15000 -f 20 -g 1 -a 100 -s 2 -t 100 -i 300
+```
+
+  We recommend a ring buffer of 2097152 and a cache size of about 600000 for the above command.
+
+* Check the OpenNMS performance graphs to understand how it behaves. Additionally, you could check the Monitoring Tools on the Azure Console for each VM.
 
 ## Termination
 
