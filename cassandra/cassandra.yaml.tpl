@@ -5,6 +5,7 @@ write_files:
 - owner: root:root
   path: /etc/sysctl.d/99-cassandra.conf
   content: |
+    # https://docs.datastax.com/en/dse/6.8/dse-admin/datastax_enterprise/config/configRecommendedSettings.html#Persistupdatedsettings
     net.ipv4.tcp_keepalive_time=60
     net.ipv4.tcp_keepalive_probes=3
     net.ipv4.tcp_keepalive_intvl=10

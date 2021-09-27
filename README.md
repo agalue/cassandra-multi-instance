@@ -63,6 +63,14 @@ terraform apply \
   -var "location=eastus"
 ```
 
+Alternatively, you can override multiple variables using a `tfvars` file, for instance:
+
+```bash
+terraform apply -var-file="wrong-snitch.tfvars"
+```
+
+The [wrong-snitch.tfvars](./wrong-snitch.tfvars) file starts the cluster without NTS for testing purposes.
+
 * Each Cassandra instance is started one per rack at a time (as only one node can be joining a cluster at any given time) because the order is important. Before starting each instance, the script that controls the bootstrap process ensures that previous instances are ready for a smooth sequence minimizing the probability of initialization errors.
 
 You could use `nodetool` to track joining progress and to make sure all the 9 instances have joined the cluster:

@@ -55,6 +55,8 @@ variable "vm_size" {
 }
 
 # Must be consistent with the chosen Location/Region
+# Please avoid RedHat/RHEL due to some cloud-init issues with 7.9
+# Keep in mind that cloud-init in 7.9 is a lot slower than 8.4
 variable "os_image" {
   description = "The OS Image to use for OpenNMS and Cassandra."
   type = object({

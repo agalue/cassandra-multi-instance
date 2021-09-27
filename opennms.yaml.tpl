@@ -55,13 +55,13 @@ write_files:
           <parameter key="factory" value="PASSWORD-CLEAR"/>
           <parameter key="username" value="cassandra"/>
           <parameter key="password" value="cassandra"/>
-          <parameter key="beans.samples" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=newts,columnfamily=samples"/>
+          <parameter key="beans.samples" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=samples"/>
           <parameter key="tests.samples" value="samples.ColumnFamilyName == 'samples'"/>
-          <parameter key="beans.terms" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=newts,columnfamily=terms"/>
+          <parameter key="beans.terms" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=terms"/>
           <parameter key="tests.terms" value="terms.ColumnFamilyName == 'terms'"/>
-          <parameter key="beans.resource_attributes" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=newts,columnfamily=resource_attributes"/>
+          <parameter key="beans.resource_attributes" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=resource_attributes"/>
           <parameter key="tests.resource_attributes" value="resource_attributes.ColumnFamilyName == 'resource_attributes'"/>
-          <parameter key="beans.resource_metrics" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=newts,columnfamily=resource_metrics"/>
+          <parameter key="beans.resource_metrics" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=resource_metrics"/>
           <parameter key="tests.resource_metrics" value="resource_metrics.ColumnFamilyName == 'resource_metrics'"/>
           <parameter key="rrd-base-name" value="jmx-cass-newts-i1"/>
           <parameter key="ds-name" value="jmx-cass-newts-i1"/>
@@ -86,13 +86,13 @@ write_files:
           <parameter key="factory" value="PASSWORD-CLEAR"/>
           <parameter key="username" value="cassandra"/>
           <parameter key="password" value="cassandra"/>
-          <parameter key="beans.samples" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=newts,columnfamily=samples"/>
+          <parameter key="beans.samples" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=samples"/>
           <parameter key="tests.samples" value="samples.ColumnFamilyName == 'samples'"/>
-          <parameter key="beans.terms" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=newts,columnfamily=terms"/>
+          <parameter key="beans.terms" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=terms"/>
           <parameter key="tests.terms" value="terms.ColumnFamilyName == 'terms'"/>
-          <parameter key="beans.resource_attributes" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=newts,columnfamily=resource_attributes"/>
+          <parameter key="beans.resource_attributes" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=resource_attributes"/>
           <parameter key="tests.resource_attributes" value="resource_attributes.ColumnFamilyName == 'resource_attributes'"/>
-          <parameter key="beans.resource_metrics" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=newts,columnfamily=resource_metrics"/>
+          <parameter key="beans.resource_metrics" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=resource_metrics"/>
           <parameter key="tests.resource_metrics" value="resource_metrics.ColumnFamilyName == 'resource_metrics'"/>
           <parameter key="rrd-base-name" value="jmx-cass-newts-i2"/>
           <parameter key="ds-name" value="jmx-cass-newts-i2"/>
@@ -117,13 +117,13 @@ write_files:
           <parameter key="factory" value="PASSWORD-CLEAR"/>
           <parameter key="username" value="cassandra"/>
           <parameter key="password" value="cassandra"/>
-          <parameter key="beans.samples" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=newts,columnfamily=samples"/>
+          <parameter key="beans.samples" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=samples"/>
           <parameter key="tests.samples" value="samples.ColumnFamilyName == 'samples'"/>
-          <parameter key="beans.terms" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=newts,columnfamily=terms"/>
+          <parameter key="beans.terms" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=terms"/>
           <parameter key="tests.terms" value="terms.ColumnFamilyName == 'terms'"/>
-          <parameter key="beans.resource_attributes" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=newts,columnfamily=resource_attributes"/>
+          <parameter key="beans.resource_attributes" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=resource_attributes"/>
           <parameter key="tests.resource_attributes" value="resource_attributes.ColumnFamilyName == 'resource_attributes'"/>
-          <parameter key="beans.resource_metrics" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=newts,columnfamily=resource_metrics"/>
+          <parameter key="beans.resource_metrics" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=resource_metrics"/>
           <parameter key="tests.resource_metrics" value="resource_metrics.ColumnFamilyName == 'resource_metrics'"/>
           <parameter key="rrd-base-name" value="jmx-cass-newts-i3"/>
           <parameter key="ds-name" value="jmx-cass-newts-i3"/>
@@ -483,8 +483,8 @@ write_files:
     fi
     . /etc/os-release
     echo "Installing and configuring PostgreSQL"
-    yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-$VERSION-x86_64/pgdg-redhat-repo-latest.noarch.rpm
-    if [[ "$VERSION" == "8" ]]; then
+    yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-$VERSION_ID-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+    if [[ "$VERSION_ID" == "8" ]]; then
       dnf -qy module disable postgresql
     fi
     yum install -y postgresql12-server
@@ -492,7 +492,7 @@ write_files:
     sed -r -i "/^(local|host)/s/(peer|ident)/trust/g" /var/lib/pgsql/12/data/pg_hba.conf
     systemctl --now enable postgresql-12
     echo "Installing and configuring OpenNMS"
-    yum install -y https://yum.opennms.org/repofiles/opennms-repo-stable-rhel$VERSION.noarch.rpm
+    yum install -y https://yum.opennms.org/repofiles/opennms-repo-stable-rhel$VERSION_ID.noarch.rpm
     yum install -y opennms-core opennms-webapp-jetty opennms-webapp-hawtio
     rsync -avr /opt/opennms-etc-overlay/ /opt/opennms/etc/
     num_cores=$(cat /proc/cpuinfo | grep "^processor" | wc -l)
@@ -533,8 +533,7 @@ write_files:
     servers=${cassandra_vms}
     instances=${cassandra_instances}
     IFS=',' read -r -a addresses <<< "${cassandra_addresses}"
-    mkdir -p /opt/opennms/etc/imports/pending
-    req=/opt/opennms/etc/imports/pending/Infrastructure.xml
+    req=/tmp/Infrastructure.xml
     ipaddr=$(ifconfig eth0 | grep 'inet[^6]' | awk '{print $2}')
     cat <<EOF > $req
     <model-import xmlns="http://xmlns.opennms.org/xsd/config/model-import" date-stamp="2018-04-01T11:00:00.000-04:00" foreign-source="Infrastructure">
@@ -572,6 +571,15 @@ write_files:
     cat <<EOF >> $req
     </model-import>
     EOF
+    echo "Waiting for OpenNMS to be ready"
+    url=http://localhost:8980/opennms
+    until $(curl --output /dev/null --silent --head --fail $url/login.jsp); do
+      printf '.'
+      sleep 5
+    done
+    curl -u admin:admin -H 'Content-Type: application/xml' -d @$req $url/rest/requisitions
+    curl -u admin:admin -H 'Content-Type: application/xml' -X PUT $url/rest/requisitions/Infrastructure/import
+done
 
 - owner: root:root
   permissions: '0400'
