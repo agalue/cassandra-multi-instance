@@ -1,38 +1,38 @@
 
 variable "user" {
-  description = "User to access VMs and name prefix for Azure resources"
+  description = "The user to access VMs and name prefix for Azure resources."
   type        = string
   default     = "agalue"
 }
 
 variable "resource_group_create" {
-  description = "Set to true to create the resource group"
+  description = "Set to true to create the resource group."
   type        = bool
   default     = false
 }
 
 variable "resource_group" {
-  description = "Name of the Azure Resource Group"
+  description = "The name of the Azure Resource Group."
   type        = string
   default     = "support-testing"
 }
 
 variable "location" {
-  description = "Name of the Azure Location"
+  description = "The name of the Azure Location."
   type        = string
   default     = "eastus"
 }
 
 variable "address_space" {
-  description = "Virtual Network Address Space"
+  description = "The Virtual Network Address Space."
   type        = string
   default     = "14.0.0.0/16"
 }
 
-# Each subnet CIDR must exist within the address_space of the chosen virtual network (address_space).
-# Due to how routing in Azure works, each Cassandra instance on each VM should live on a different subnet.
+# Each subnet CIDR must exist within the address_space of the chosen virtual network.
+# Due to how routing in Azure works, each NIC of each Cassandra VM would live on a different subnet.
 variable "subnets" {
-  description = "Subnet ranges for each Cassandra instance; the size determines the number of NICs per VM"
+  description = "The subnet ranges for each Cassandra instance; the size determines the number of NICs per VM"
   type        = list(string)
   default     = [
     "14.0.1.0/24",
@@ -43,7 +43,7 @@ variable "subnets" {
 }
 
 variable "vm_size" {
-  description = "Size of the VMs"
+  description = "The size of the VMs in Azure per kind."
   type = object({
     cassandra = string
     opennms   = string
@@ -56,7 +56,7 @@ variable "vm_size" {
 
 # Must be consistent with the chosen Location/Region
 variable "os_image" {
-  description = "OS Image to use for OpenNMS and Cassandra"
+  description = "The OS Image to use for OpenNMS and Cassandra."
   type = object({
     publisher = string
     offer     = string
@@ -72,19 +72,19 @@ variable "os_image" {
 }
 
 variable "num_vms" {
-  description = "Number of Cassandra Servers in the cluster"
+  description = "The number of Cassandra Servers; that doesn't define the size of the cluster."
   type        = number
   default     = 3
 }
 
 variable "num_instances" {
-  description = "Number of Cassandra Instances per Server; must be less or equal to the available subnets."
+  description = "The number of Cassandra Instances per Server; must be less or equal to the available subnets."
   type        = number
   default     = 3
 }
 
 variable "cassandra_settings" {
-  description = "Cassandra settings"
+  description = "The Cassandra settings."
   type = object({
     version                = string
     disk_size              = number
@@ -113,13 +113,13 @@ variable "cassandra_settings" {
     # TWCS settings for the newts.samples table
     compaction_window_size = 7
     compaction_window_unit = "DAYS"
-    expired_sstable_check  = 86400
-    gc_grace_seconds       = 604800
+    expired_sstable_check  = 86400 # Expressed in seconds
+    gc_grace_seconds       = 604800 # Expressed in seconds
   }
 }
 
 variable "opennms_settings" {
-  description = "OpenNMS settings"
+  description = "The OpenNMS settings"
   type = object({
     newts_ttl            = number
     newts_resource_shard = number
