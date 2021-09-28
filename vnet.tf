@@ -11,7 +11,7 @@ resource "azurerm_resource_group" "main" {
 }
 
 resource "azurerm_virtual_network" "main" {
-  name                = "${var.user}-cassandra-vnet"
+  name                = "${var.name_prefix}-cassandra-vnet"
   location            = var.location
   resource_group_name = local.resource_group
   address_space       = [var.address_space]
@@ -27,7 +27,7 @@ resource "azurerm_subnet" "main" {
 }
 
 resource "azurerm_network_security_group" "main" {
-  name                = "${var.user}-cassandra-sg"
+  name                = "${var.name_prefix}-cassandra-sg"
   location            = var.location
   resource_group_name = local.resource_group
   tags                = local.required_tags
@@ -46,7 +46,7 @@ resource "azurerm_network_security_group" "main" {
 }
 
 resource "azurerm_network_security_group" "opennms" {
-  name                = "${var.user}-opennms-sg"
+  name                = "${var.name_prefix}-opennms-sg"
   location            = var.location
   resource_group_name = var.resource_group
   tags                = local.required_tags

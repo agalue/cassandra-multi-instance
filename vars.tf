@@ -5,6 +5,12 @@ variable "user" {
   default     = "agalue"
 }
 
+variable "name_prefix" {
+  description = "A prefix to add to all Azure resources, to make them unique."
+  type        = string
+  default     = "agalue"
+}
+
 variable "resource_group_create" {
   description = "Set to true to create the resource group."
   type        = bool
@@ -80,9 +86,16 @@ variable "num_vms" {
 }
 
 variable "num_instances" {
-  description = "The number of Cassandra Instances per Server; must be less or equal to the available subnets."
+  description = "The number of Cassandra Instances per Server; must be less or equal to the available subnets, and less than 9."
   type        = number
   default     = 3
+
+  validation {
+    condition = (
+      var.num_instances <= 9
+    )
+    error_message = "The num_instances cannot be greater than 9."
+  }
 }
 
 variable "cassandra_settings" {
