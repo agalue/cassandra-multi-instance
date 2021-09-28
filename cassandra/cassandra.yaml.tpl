@@ -139,6 +139,8 @@ write_files:
   path: /etc/cassandra/bootstrap.sh
   content: |
     #!/bin/bash
+    # For SimpleSnitch starts one instance at a time in physical order.
+    # For GossipingPropertyFileSnitch starts one instance at a time per server/rack.
     function wait_for_seed {
       until echo -n >/dev/tcp/${seed_host}/9042 2>/dev/null; do
         printf '.'
@@ -164,7 +166,10 @@ write_files:
     systemctl restart snmpd
     systemctl restart rsyslog
     systemctl mask cassandra
-    required_instances=$(($j - 1))
+    required_instances=0
+    if [[ "$snitch" != "SimpleSnitch" ]]; then
+      required_instances=$(($j - 1))
+    fi
     for i in $(seq 1 $instances); do
       echo "Bootstrapping instance $i from server $j..."
       if [[ "$j" == "1" ]] && [[ "$i" == "1" ]]; then
@@ -180,6 +185,9 @@ write_files:
         cqlsh -f /etc/cassandra/newts_tables.cql $(hostname)
       else
         wait_for_seed
+        if [[ "$snitch" == "SimpleSnitch" ]]; then
+          required_instances=$(($instances*($j-1) + ($i-1)))
+        fi
         running_instances=$(get_running_instances)
         echo "Starting instance $i from server $j..."
         echo "Waiting to have $required_instances running..."
@@ -192,7 +200,9 @@ write_files:
         echo "Starting cassandra..."
         systemctl enable --now cassandra3@node$i
       fi
-      required_instances=$(($required_instances + $instances))
+      if [[ "$snitch" != "SimpleSnitch" ]]; then
+        required_instances=$(($required_instances + $instances))
+      fi
     done
 
 - owner: root:root
