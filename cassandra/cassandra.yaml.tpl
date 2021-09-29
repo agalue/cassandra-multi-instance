@@ -397,6 +397,8 @@ write_files:
     echo 'if [ -z "$CASSANDRA_CONF" ]; then
       CASSANDRA_CONF=/etc/cassandra/conf
     fi' | cat - $infile > /tmp/_temp && mv /tmp/_temp $infile
+    # Finish
+    systemctl mask cassandra
     touch /etc/cassandra/.configured
 
 - owner: root:root
