@@ -254,8 +254,8 @@ write_files:
           <parameter key="retry" value="2"/>
           <parameter key="timeout" value="3000"/>
           <parameter key="banner" value="*"/>
-          <parameter key="rrd-base-name" value="jmx-cass-i1"/>
-          <parameter key="ds-name" value="jmx-cass-i1"/>
+          <parameter key="rrd-base-name" value="jmx-cass-i$i"/>
+          <parameter key="ds-name" value="jmx-cass-i$i"/>
           <parameter key="rrd-repository" value="/opt/opennms/share/rrd/response"/>
         </service>
         <service name="JMX-Cassandra-Newts-I$i" interval="30000" user-defined="false" status="on">
@@ -276,8 +276,8 @@ write_files:
           <parameter key="tests.resource_attributes" value="resource_attributes.ColumnFamilyName == 'resource_attributes'"/>
           <parameter key="beans.resource_metrics" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=resource_metrics"/>
           <parameter key="tests.resource_metrics" value="resource_metrics.ColumnFamilyName == 'resource_metrics'"/>
-          <parameter key="rrd-base-name" value="jmx-cass-newts-i1"/>
-          <parameter key="ds-name" value="jmx-cass-newts-i1"/>
+          <parameter key="rrd-base-name" value="jmx-cass-newts-i$i"/>
+          <parameter key="ds-name" value="jmx-cass-newts-i$i"/>
           <parameter key="rrd-repository" value="/opt/opennms/share/rrd/response"/>
         </service>
     EOF
@@ -342,7 +342,7 @@ write_files:
           <parameter key="protocol" value="rmi"/>
           <parameter key="urlPath" value="/jmxrmi"/>
           <parameter key="collection" value="jmx-cassandra30x"/>
-          <parameter key="friendly-name" value="cassandra-instance1"/>
+          <parameter key="friendly-name" value="cassandra-instance$i"/>
           <parameter key="thresholding-enabled" value="true"/>
           <parameter key="factory" value="PASSWORD-CLEAR"/>
           <parameter key="username" value="cassandra"/>
@@ -355,7 +355,7 @@ write_files:
           <parameter key="protocol" value="rmi"/>
           <parameter key="urlPath" value="/jmxrmi"/>
           <parameter key="collection" value="jmx-cassandra30x-newts"/>
-          <parameter key="friendly-name" value="cassandra-newts-instance2"/>
+          <parameter key="friendly-name" value="cassandra-newts-instance$i"/>
           <parameter key="thresholding-enabled" value="true"/>
           <parameter key="factory" value="PASSWORD-CLEAR"/>
           <parameter key="username" value="cassandra"/>
