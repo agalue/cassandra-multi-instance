@@ -25,277 +25,6 @@ write_files:
     </foreign-source>
 
 - owner: root:root
-  path: /opt/opennms-etc-overlay/poller-configuration.xml
-  content: |
-    <poller-configuration xmlns="http://xmlns.opennms.org/xsd/config/poller" threads="30" nextOutageId="SELECT nextval('outageNxtId')" serviceUnresponsiveEnabled="false" pathOutageEnabled="false">
-      <node-outage status="on" pollAllIfNoCriticalServiceDefined="true">
-        <critical-service name="ICMP"/>
-      </node-outage>
-      <package name="cassandra-via-jmx">
-        <filter>IPADDR != '0.0.0.0'</filter>
-        <rrd step="30">
-          <rra>RRA:AVERAGE:0.5:1:2016</rra>
-        </rrd>
-        <service name="JMX-Cassandra-I1" interval="30000" user-defined="false" status="on">
-          <parameter key="port" value="7199"/>
-          <parameter key="retry" value="2"/>
-          <parameter key="timeout" value="3000"/>
-          <parameter key="banner" value="*"/>
-          <parameter key="rrd-base-name" value="jmx-cass-i1"/>
-          <parameter key="ds-name" value="jmx-cass-i1"/>
-          <parameter key="rrd-repository" value="/opt/opennms/share/rrd/response"/>
-        </service>
-        <service name="JMX-Cassandra-Newts-I1" interval="30000" user-defined="false" status="on">
-          <parameter key="port" value="7199"/>
-          <parameter key="retry" value="2"/>
-          <parameter key="timeout" value="3000"/>
-          <parameter key="protocol" value="rmi"/>
-          <parameter key="urlPath" value="/jmxrmi"/>
-          <parameter key="thresholding-enabled" value="true"/>
-          <parameter key="factory" value="PASSWORD-CLEAR"/>
-          <parameter key="username" value="cassandra"/>
-          <parameter key="password" value="cassandra"/>
-          <parameter key="beans.samples" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=samples"/>
-          <parameter key="tests.samples" value="samples.ColumnFamilyName == 'samples'"/>
-          <parameter key="beans.terms" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=terms"/>
-          <parameter key="tests.terms" value="terms.ColumnFamilyName == 'terms'"/>
-          <parameter key="beans.resource_attributes" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=resource_attributes"/>
-          <parameter key="tests.resource_attributes" value="resource_attributes.ColumnFamilyName == 'resource_attributes'"/>
-          <parameter key="beans.resource_metrics" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=resource_metrics"/>
-          <parameter key="tests.resource_metrics" value="resource_metrics.ColumnFamilyName == 'resource_metrics'"/>
-          <parameter key="rrd-base-name" value="jmx-cass-newts-i1"/>
-          <parameter key="ds-name" value="jmx-cass-newts-i1"/>
-          <parameter key="rrd-repository" value="/opt/opennms/share/rrd/response"/>
-        </service>
-        <service name="JMX-Cassandra-I2" interval="30000" user-defined="false" status="on">
-          <parameter key="port" value="7299"/>
-          <parameter key="retry" value="2"/>
-          <parameter key="timeout" value="3000"/>
-          <parameter key="banner" value="*"/>
-          <parameter key="rrd-base-name" value="jmx-cass-i2"/>
-          <parameter key="ds-name" value="jmx-cass-i2"/>
-          <parameter key="rrd-repository" value="/opt/opennms/share/rrd/response"/>
-        </service>
-        <service name="JMX-Cassandra-Newts-I2" interval="30000" user-defined="false" status="on">
-          <parameter key="port" value="7299"/>
-          <parameter key="retry" value="2"/>
-          <parameter key="timeout" value="3000"/>
-          <parameter key="protocol" value="rmi"/>
-          <parameter key="urlPath" value="/jmxrmi"/>
-          <parameter key="thresholding-enabled" value="true"/>
-          <parameter key="factory" value="PASSWORD-CLEAR"/>
-          <parameter key="username" value="cassandra"/>
-          <parameter key="password" value="cassandra"/>
-          <parameter key="beans.samples" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=samples"/>
-          <parameter key="tests.samples" value="samples.ColumnFamilyName == 'samples'"/>
-          <parameter key="beans.terms" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=terms"/>
-          <parameter key="tests.terms" value="terms.ColumnFamilyName == 'terms'"/>
-          <parameter key="beans.resource_attributes" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=resource_attributes"/>
-          <parameter key="tests.resource_attributes" value="resource_attributes.ColumnFamilyName == 'resource_attributes'"/>
-          <parameter key="beans.resource_metrics" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=resource_metrics"/>
-          <parameter key="tests.resource_metrics" value="resource_metrics.ColumnFamilyName == 'resource_metrics'"/>
-          <parameter key="rrd-base-name" value="jmx-cass-newts-i2"/>
-          <parameter key="ds-name" value="jmx-cass-newts-i2"/>
-          <parameter key="rrd-repository" value="/opt/opennms/share/rrd/response"/>
-        </service>
-        <service name="JMX-Cassandra-I3" interval="30000" user-defined="false" status="on">
-          <parameter key="port" value="7399"/>
-          <parameter key="retry" value="2"/>
-          <parameter key="timeout" value="3000"/>
-          <parameter key="banner" value="*"/>
-          <parameter key="rrd-base-name" value="jmx-cass-i3"/>
-          <parameter key="ds-name" value="jmx-cass-i3"/>
-          <parameter key="rrd-repository" value="/opt/opennms/share/rrd/response"/>
-        </service>
-        <service name="JMX-Cassandra-Newts-I3" interval="30000" user-defined="false" status="on">
-          <parameter key="port" value="7399"/>
-          <parameter key="retry" value="2"/>
-          <parameter key="timeout" value="3000"/>
-          <parameter key="protocol" value="rmi"/>
-          <parameter key="urlPath" value="/jmxrmi"/>
-          <parameter key="thresholding-enabled" value="true"/>
-          <parameter key="factory" value="PASSWORD-CLEAR"/>
-          <parameter key="username" value="cassandra"/>
-          <parameter key="password" value="cassandra"/>
-          <parameter key="beans.samples" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=samples"/>
-          <parameter key="tests.samples" value="samples.ColumnFamilyName == 'samples'"/>
-          <parameter key="beans.terms" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=terms"/>
-          <parameter key="tests.terms" value="terms.ColumnFamilyName == 'terms'"/>
-          <parameter key="beans.resource_attributes" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=resource_attributes"/>
-          <parameter key="tests.resource_attributes" value="resource_attributes.ColumnFamilyName == 'resource_attributes'"/>
-          <parameter key="beans.resource_metrics" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=resource_metrics"/>
-          <parameter key="tests.resource_metrics" value="resource_metrics.ColumnFamilyName == 'resource_metrics'"/>
-          <parameter key="rrd-base-name" value="jmx-cass-newts-i3"/>
-          <parameter key="ds-name" value="jmx-cass-newts-i3"/>
-          <parameter key="rrd-repository" value="/opt/opennms/share/rrd/response"/>
-        </service>
-        <downtime begin="0" end="300000" interval="30000"/><!-- 30s, 0, 5m -->
-        <downtime begin="300000" end="43200000" interval="300000"/><!-- 5m, 5m, 12h -->
-        <downtime begin="43200000" end="432000000" interval="600000"/><!-- 10m, 12h, 5d -->
-        <downtime begin="432000000" interval="3600000"/><!-- 1h, 5d -->
-      </package>
-      <package name="main">
-        <filter>IPADDR != '0.0.0.0'</filter>
-        <include-range begin="1.1.1.1" end="254.254.254.254"/>
-        <rrd step="30">
-          <rra>RRA:AVERAGE:0.5:1:2016</rra>
-          <rra>RRA:AVERAGE:0.5:12:1488</rra>
-          <rra>RRA:AVERAGE:0.5:288:366</rra>
-          <rra>RRA:MAX:0.5:288:366</rra>
-          <rra>RRA:MIN:0.5:288:366</rra>
-        </rrd>
-        <service name="ICMP" interval="30000" user-defined="false" status="on">
-          <parameter key="retry" value="2"/>
-          <parameter key="timeout" value="3000"/>
-          <parameter key="rrd-repository" value="/opt/opennms/share/rrd/response"/>
-          <parameter key="rrd-base-name" value="icmp"/>
-          <parameter key="ds-name" value="icmp"/>
-        </service>
-        <service name="OpenNMS-JVM" interval="30000" user-defined="false" status="on">
-          <parameter key="port" value="18980"/>
-          <parameter key="retry" value="2"/>
-          <parameter key="timeout" value="3000"/>
-          <parameter key="rrd-repository" value="/opt/opennms/share/rrd/response"/>
-        </service>
-        <downtime begin="0" end="300000" interval="30000"/><!-- 30s, 0, 5m -->
-        <downtime begin="300000" end="43200000" interval="300000"/><!-- 5m, 5m, 12h -->
-        <downtime begin="43200000" end="432000000" interval="600000"/><!-- 10m, 12h, 5d -->
-        <downtime begin="432000000" interval="3600000"/><!-- 1h, 5d -->
-      </package>
-      <monitor service="JMX-Cassandra-I1" class-name="org.opennms.netmgt.poller.monitors.TcpMonitor"/>
-      <monitor service="JMX-Cassandra-Newts-I1" class-name="org.opennms.netmgt.poller.monitors.Jsr160Monitor"/>
-      <monitor service="JMX-Cassandra-I2" class-name="org.opennms.netmgt.poller.monitors.TcpMonitor"/>
-      <monitor service="JMX-Cassandra-Newts-I2" class-name="org.opennms.netmgt.poller.monitors.Jsr160Monitor"/>
-      <monitor service="JMX-Cassandra-I3" class-name="org.opennms.netmgt.poller.monitors.TcpMonitor"/>
-      <monitor service="JMX-Cassandra-Newts-I3" class-name="org.opennms.netmgt.poller.monitors.Jsr160Monitor"/>
-      <monitor service="ICMP" class-name="org.opennms.netmgt.poller.monitors.IcmpMonitor"/>
-      <monitor service="OpenNMS-JVM" class-name="org.opennms.netmgt.poller.monitors.Jsr160Monitor"/>
-    </poller-configuration>
-
-- owner: root:root
-  path: /opt/opennms-etc-overlay/collectd-configuration.xml
-  content: |
-    <collectd-configuration xmlns="http://xmlns.opennms.org/xsd/config/collectd" threads="50">
-      <package name="cassandra-via-jmx" remote="false">
-        <filter>IPADDR != '0.0.0.0'</filter>
-        <service name="JMX-Cassandra-I1" interval="30000" user-defined="false" status="on">
-          <parameter key="port" value="7199"/>
-          <parameter key="retry" value="2"/>
-          <parameter key="timeout" value="3000"/>
-          <parameter key="protocol" value="rmi"/>
-          <parameter key="urlPath" value="/jmxrmi"/>
-          <parameter key="collection" value="jmx-cassandra30x"/>
-          <parameter key="friendly-name" value="cassandra-instance1"/>
-          <parameter key="thresholding-enabled" value="true"/>
-          <parameter key="factory" value="PASSWORD-CLEAR"/>
-          <parameter key="username" value="cassandra"/>
-          <parameter key="password" value="cassandra"/>
-        </service>
-        <service name="JMX-Cassandra-Newts-I1" interval="30000" user-defined="false" status="on">
-          <parameter key="port" value="7199"/>
-          <parameter key="retry" value="2"/>
-          <parameter key="timeout" value="3000"/>
-          <parameter key="protocol" value="rmi"/>
-          <parameter key="urlPath" value="/jmxrmi"/>
-          <parameter key="collection" value="jmx-cassandra30x-newts"/>
-          <parameter key="friendly-name" value="cassandra-newts-instance1"/>
-          <parameter key="thresholding-enabled" value="true"/>
-          <parameter key="factory" value="PASSWORD-CLEAR"/>
-          <parameter key="username" value="cassandra"/>
-          <parameter key="password" value="cassandra"/>
-        </service>
-        <service name="JMX-Cassandra-I2" interval="30000" user-defined="false" status="on">
-          <parameter key="port" value="7299"/>
-          <parameter key="retry" value="2"/>
-          <parameter key="timeout" value="3000"/>
-          <parameter key="protocol" value="rmi"/>
-          <parameter key="urlPath" value="/jmxrmi"/>
-          <parameter key="collection" value="jmx-cassandra30x"/>
-          <parameter key="friendly-name" value="cassandra-instance2"/>
-          <parameter key="thresholding-enabled" value="true"/>
-          <parameter key="factory" value="PASSWORD-CLEAR"/>
-          <parameter key="username" value="cassandra"/>
-          <parameter key="password" value="cassandra"/>
-        </service>
-        <service name="JMX-Cassandra-Newts-I2" interval="30000" user-defined="false" status="on">
-          <parameter key="port" value="7299"/>
-          <parameter key="retry" value="2"/>
-          <parameter key="timeout" value="3000"/>
-          <parameter key="protocol" value="rmi"/>
-          <parameter key="urlPath" value="/jmxrmi"/>
-          <parameter key="collection" value="jmx-cassandra30x-newts"/>
-          <parameter key="friendly-name" value="cassandra-newts-instance2"/>
-          <parameter key="thresholding-enabled" value="true"/>
-          <parameter key="factory" value="PASSWORD-CLEAR"/>
-          <parameter key="username" value="cassandra"/>
-          <parameter key="password" value="cassandra"/>
-        </service>
-        <service name="JMX-Cassandra-I3" interval="30000" user-defined="false" status="on">
-          <parameter key="port" value="7399"/>
-          <parameter key="retry" value="2"/>
-          <parameter key="timeout" value="3000"/>
-          <parameter key="protocol" value="rmi"/>
-          <parameter key="urlPath" value="/jmxrmi"/>
-          <parameter key="collection" value="jmx-cassandra30x"/>
-          <parameter key="friendly-name" value="cassandra-instance3"/>
-          <parameter key="thresholding-enabled" value="true"/>
-          <parameter key="factory" value="PASSWORD-CLEAR"/>
-          <parameter key="username" value="cassandra"/>
-          <parameter key="password" value="cassandra"/>
-        </service>
-        <service name="JMX-Cassandra-Newts-I3" interval="30000" user-defined="false" status="on">
-          <parameter key="port" value="7399"/>
-          <parameter key="retry" value="2"/>
-          <parameter key="timeout" value="3000"/>
-          <parameter key="protocol" value="rmi"/>
-          <parameter key="urlPath" value="/jmxrmi"/>
-          <parameter key="collection" value="jmx-cassandra30x-newts"/>
-          <parameter key="friendly-name" value="cassandra-newts-instance3"/>
-          <parameter key="thresholding-enabled" value="true"/>
-          <parameter key="factory" value="PASSWORD-CLEAR"/>
-          <parameter key="username" value="cassandra"/>
-          <parameter key="password" value="cassandra"/>
-        </service>
-      </package>
-      <package name="main" remote="false">
-        <filter>IPADDR != '0.0.0.0'</filter>
-        <include-range begin="1.1.1.1" end="254.254.254.254"/>
-        <service name="SNMP" interval="30000" user-defined="false" status="on">
-          <parameter key="collection" value="default"/>
-          <parameter key="thresholding-enabled" value="true"/>
-        </service>
-        <service name="OpenNMS-JVM" interval="30000" user-defined="false" status="on">
-          <parameter key="port" value="18980"/>
-          <parameter key="retry" value="2"/>
-          <parameter key="timeout" value="3000"/>
-          <parameter key="collection" value="jsr160"/>
-          <parameter key="friendly-name" value="opennms-jvm"/>
-          <parameter key="thresholding-enabled" value="true"/>
-          <parameter key="factory" value="PASSWORD-CLEAR"/>
-          <parameter key="username" value="admin"/>
-          <parameter key="password" value="admin"/>
-        </service>
-        <service name="PostgreSQL" interval="30000" user-defined="false" status="on">
-          <parameter key="collection" value="PostgreSQL"/>
-          <parameter key="thresholding-enabled" value="true"/>
-          <parameter key="driver" value="org.postgresql.Driver"/>
-          <parameter key="user" value="postgres"/>
-          <parameter key="password" value="postgres"/>
-          <parameter key="url" value="jdbc:postgresql://OPENNMS_JDBC_HOSTNAME:5432/opennms"/>
-        </service>
-      </package>
-      <collector service="PostgreSQL" class-name="org.opennms.netmgt.collectd.JdbcCollector"/>
-      <collector service="SNMP" class-name="org.opennms.netmgt.collectd.SnmpCollector"/>
-      <collector service="OpenNMS-JVM" class-name="org.opennms.netmgt.collectd.Jsr160Collector"/>
-      <collector service="JMX-Cassandra-I1" class-name="org.opennms.netmgt.collectd.Jsr160Collector"/>
-      <collector service="JMX-Cassandra-Newts-I1" class-name="org.opennms.netmgt.collectd.Jsr160Collector"/>
-      <collector service="JMX-Cassandra-I2" class-name="org.opennms.netmgt.collectd.Jsr160Collector"/>
-      <collector service="JMX-Cassandra-Newts-I2" class-name="org.opennms.netmgt.collectd.Jsr160Collector"/>
-      <collector service="JMX-Cassandra-I3" class-name="org.opennms.netmgt.collectd.Jsr160Collector"/>
-      <collector service="JMX-Cassandra-Newts-I3" class-name="org.opennms.netmgt.collectd.Jsr160Collector"/>
-    </collectd-configuration>
-
-- owner: root:root
   path: /opt/opennms-etc-overlay/jmx-datacollection-config.d/cassandra30x-newts.xml
   content: |
     <?xml version="1.0"?>
@@ -307,98 +36,98 @@ write_files:
         <mbeans>
           <!-- Newts :: AllMemmtables -->
           <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=newts*,name=AllMemtablesLiveDataSize">
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=AllMemtablesLiveDataSize">
             <attrib name="Value" alias="alMemTblLiDaSi" type="gauge"/>
           </mbean>
           <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=newts*,name=AllMemtablesOffHeapDataSize">
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=AllMemtablesOffHeapDataSize">
             <attrib name="Value" alias="alMemTblOffHeapDaSi" type="gauge"/>
           </mbean>
           <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=newts*,name=AllMemtablesOnHeapDataSize">
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=AllMemtablesOnHeapDataSize">
             <attrib name="Value" alias="alMemTblOnHeapDaSi" type="gauge"/>
           </mbean>
           <!-- Memtable :: Count -->
           <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=newts*,name=MemtableSwitchCount">
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=MemtableSwitchCount">
             <attrib name="Value" alias="memTblSwitchCount" type="counter"/>
           </mbean>
           <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=newts*,name=MemtableColumnsCount">
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=MemtableColumnsCount">
             <attrib name="Value" alias="memTblColumnsCnt" type="gauge"/>
           </mbean>
           <!-- Memtable :: Sizes -->
           <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=newts*,name=MemtableLiveDataSize">
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=MemtableLiveDataSize">
             <attrib name="Value" alias="memTblLiveDaSi" type="gauge"/>
           </mbean>
           <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=newts*,name=MemtableOffHeapDataSize">
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=MemtableOffHeapDataSize">
             <attrib name="Value" alias="memTblOffHeapDaSi" type="gauge"/>
           </mbean>
           <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=newts*,name=MemtableOnHeapDataSize">
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=MemtableOnHeapDataSize">
             <attrib name="Value" alias="memTblOnHeapDaSi" type="gauge"/>
           </mbean>
           <!-- Latency -->
           <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=newts*,name=ReadTotalLatency">
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=ReadTotalLatency">
             <attrib name="Count" alias="readTotLtncy" type="counter"/>
           </mbean>
           <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=newts*,name=RangeLatency">
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=RangeLatency">
             <attrib name="99thPercentile" alias="rangeLtncy99" type="gauge"/>
           </mbean>
           <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=newts*,name=WriteTotalLatency">
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=WriteTotalLatency">
             <attrib name="Count" alias="writeTotLtncy" type="counter"/>
           </mbean>
           <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=newts*,name=CasCommitTotalLatency">
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=CasCommitTotalLatency">
             <attrib name="Count" alias="casCommitTotLtncy" type="counter"/>
           </mbean>
           <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=newts*,name=CasPrepareTotalLatency">
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=CasPrepareTotalLatency">
             <attrib name="Count" alias="casPrepareTotLtncy" type="counter"/>
           </mbean>
           <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=newts*,name=CasProposeTotalLatency">
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=CasProposeTotalLatency">
             <attrib name="Count" alias="casProposeTotLtncy" type="counter"/>
           </mbean>
           <!-- Bloom Filter -->
           <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=newts*,name=BloomFilterDiskSpaceUsed">
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=BloomFilterDiskSpaceUsed">
             <attrib name="Value" alias="blmFltrDskSpcUsed" type="gauge"/>
           </mbean>
           <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=newts*,name=BloomFilterOffHeapMemoryUsed">
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=BloomFilterOffHeapMemoryUsed">
             <attrib name="Value" alias="blmFltrOffHeapMemUs" type="gauge"/>
           </mbean>
           <!-- Memory Used -->
           <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=newts*,name=CompressionMetadataOffHeapMemoryUsed">
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=CompressionMetadataOffHeapMemoryUsed">
             <attrib name="Value" alias="cmpMetaOffHeapMemUs" type="gauge"/>
           </mbean>
           <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=newts*,name=IndexSummaryOffHeapMemoryUsed">
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=IndexSummaryOffHeapMemoryUsed">
             <attrib name="Value" alias="idxSumOffHeapMemUs" type="gauge"/>
           </mbean>
           <!-- Pending -->
           <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=newts*,name=PendingCompactions">
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=PendingCompactions">
             <attrib name="Value" alias="pendingCompactions" type="gauge"/>
           </mbean>
           <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=newts*,name=PendingFlushes">
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=PendingFlushes">
             <attrib name="Value" alias="pendingFlushes" type="gauge"/>
           </mbean>
           <!-- Disk Space -->
           <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=newts*,name=TotalDiskSpaceUsed">
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=TotalDiskSpaceUsed">
             <attrib name="Value" alias="totalDiskSpaceUsed" type="gauge"/>
           </mbean>
           <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=newts*,name=LiveDiskSpaceUsed">
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=LiveDiskSpaceUsed">
             <attrib name="Value" alias="liveDiskSpaceUsed" type="gauge"/>
           </mbean>
         </mbeans>
@@ -471,6 +200,184 @@ write_files:
     ADDITIONAL_MANAGER_OPTIONS="$ADDITIONAL_MANAGER_OPTIONS -XX:+UseTLAB"
     ADDITIONAL_MANAGER_OPTIONS="$ADDITIONAL_MANAGER_OPTIONS -XX:+ResizeTLAB"
     ADDITIONAL_MANAGER_OPTIONS="$ADDITIONAL_MANAGER_OPTIONS -XX:-UseBiasedLocking"
+
+- owner: root:root
+  permissions: '0755'
+  path: /tmp/configure-jmx.sh
+  content: |
+    #!/bin/bash
+    cassandra_instances=${cassandra_instances}
+    cfg=/opt/opennms/etc/poller-configuration.xml
+    cat <<EOF > $cfg
+    <poller-configuration xmlns="http://xmlns.opennms.org/xsd/config/poller" threads="30" nextOutageId="SELECT nextval('outageNxtId')" serviceUnresponsiveEnabled="false" pathOutageEnabled="false">
+      <node-outage status="on" pollAllIfNoCriticalServiceDefined="true">
+        <critical-service name="ICMP"/>
+      </node-outage>
+      <package name="main">
+        <filter>IPADDR != '0.0.0.0'</filter>
+        <include-range begin="1.1.1.1" end="254.254.254.254"/>
+        <rrd step="30">
+          <rra>RRA:AVERAGE:0.5:1:2016</rra>
+          <rra>RRA:AVERAGE:0.5:12:1488</rra>
+          <rra>RRA:AVERAGE:0.5:288:366</rra>
+          <rra>RRA:MAX:0.5:288:366</rra>
+          <rra>RRA:MIN:0.5:288:366</rra>
+        </rrd>
+        <service name="ICMP" interval="30000" user-defined="false" status="on">
+          <parameter key="retry" value="2"/>
+          <parameter key="timeout" value="3000"/>
+          <parameter key="rrd-repository" value="/opt/opennms/share/rrd/response"/>
+          <parameter key="rrd-base-name" value="icmp"/>
+          <parameter key="ds-name" value="icmp"/>
+        </service>
+        <service name="OpenNMS-JVM" interval="30000" user-defined="false" status="on">
+          <parameter key="port" value="18980"/>
+          <parameter key="retry" value="2"/>
+          <parameter key="timeout" value="3000"/>
+          <parameter key="rrd-repository" value="/opt/opennms/share/rrd/response"/>
+        </service>
+        <downtime begin="0" end="300000" interval="30000"/><!-- 30s, 0, 5m -->
+        <downtime begin="300000" end="43200000" interval="300000"/><!-- 5m, 5m, 12h -->
+        <downtime begin="43200000" end="432000000" interval="600000"/><!-- 10m, 12h, 5d -->
+        <downtime begin="432000000" interval="3600000"/><!-- 1h, 5d -->
+      </package>
+      <package name="cassandra-via-jmx">
+        <filter>IPADDR != '0.0.0.0'</filter>
+        <rrd step="30">
+          <rra>RRA:AVERAGE:0.5:1:2016</rra>
+        </rrd>
+    EOF
+    for i in $(seq 1 $cassandra_instances); do
+      cat <<EOF >> $cfg
+        <service name="JMX-Cassandra-I$i" interval="30000" user-defined="false" status="on">
+          <parameter key="port" value="7$${i}99"/>
+          <parameter key="retry" value="2"/>
+          <parameter key="timeout" value="3000"/>
+          <parameter key="banner" value="*"/>
+          <parameter key="rrd-base-name" value="jmx-cass-i1"/>
+          <parameter key="ds-name" value="jmx-cass-i1"/>
+          <parameter key="rrd-repository" value="/opt/opennms/share/rrd/response"/>
+        </service>
+        <service name="JMX-Cassandra-Newts-I$i" interval="30000" user-defined="false" status="on">
+          <parameter key="port" value="7$${i}99"/>
+          <parameter key="retry" value="2"/>
+          <parameter key="timeout" value="3000"/>
+          <parameter key="protocol" value="rmi"/>
+          <parameter key="urlPath" value="/jmxrmi"/>
+          <parameter key="thresholding-enabled" value="true"/>
+          <parameter key="factory" value="PASSWORD-CLEAR"/>
+          <parameter key="username" value="cassandra"/>
+          <parameter key="password" value="cassandra"/>
+          <parameter key="beans.samples" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=samples"/>
+          <parameter key="tests.samples" value="samples.ColumnFamilyName == 'samples'"/>
+          <parameter key="beans.terms" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=terms"/>
+          <parameter key="tests.terms" value="terms.ColumnFamilyName == 'terms'"/>
+          <parameter key="beans.resource_attributes" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=resource_attributes"/>
+          <parameter key="tests.resource_attributes" value="resource_attributes.ColumnFamilyName == 'resource_attributes'"/>
+          <parameter key="beans.resource_metrics" value="org.apache.cassandra.db:type=ColumnFamilies,keyspace=${newts_keyspace},columnfamily=resource_metrics"/>
+          <parameter key="tests.resource_metrics" value="resource_metrics.ColumnFamilyName == 'resource_metrics'"/>
+          <parameter key="rrd-base-name" value="jmx-cass-newts-i1"/>
+          <parameter key="ds-name" value="jmx-cass-newts-i1"/>
+          <parameter key="rrd-repository" value="/opt/opennms/share/rrd/response"/>
+        </service>
+    EOF
+    done
+      cat <<EOF >> $cfg
+        <downtime begin="0" end="300000" interval="30000"/><!-- 30s, 0, 5m -->
+        <downtime begin="300000" end="43200000" interval="300000"/><!-- 5m, 5m, 12h -->
+        <downtime begin="43200000" end="432000000" interval="600000"/><!-- 10m, 12h, 5d -->
+        <downtime begin="432000000" interval="3600000"/><!-- 1h, 5d -->
+      </package>
+      <monitor service="ICMP" class-name="org.opennms.netmgt.poller.monitors.IcmpMonitor"/>
+      <monitor service="OpenNMS-JVM" class-name="org.opennms.netmgt.poller.monitors.Jsr160Monitor"/>
+    EOF
+    for i in $(seq 1 $cassandra_instances); do
+      cat <<EOF >> $cfg
+      <monitor service="JMX-Cassandra-I$i" class-name="org.opennms.netmgt.poller.monitors.TcpMonitor"/>
+      <monitor service="JMX-Cassandra-Newts-I$i" class-name="org.opennms.netmgt.poller.monitors.Jsr160Monitor"/>
+    EOF
+    done
+    cat <<EOF >> $cfg
+    </poller-configuration>
+    EOF
+    cfg=/opt/opennms/etc/collectd-configuration.xml
+    cat <<EOF > $cfg
+    <collectd-configuration xmlns="http://xmlns.opennms.org/xsd/config/collectd" threads="50">
+      <package name="main" remote="false">
+        <filter>IPADDR != '0.0.0.0'</filter>
+        <include-range begin="1.1.1.1" end="254.254.254.254"/>
+        <service name="SNMP" interval="30000" user-defined="false" status="on">
+          <parameter key="collection" value="default"/>
+          <parameter key="thresholding-enabled" value="true"/>
+        </service>
+        <service name="OpenNMS-JVM" interval="30000" user-defined="false" status="on">
+          <parameter key="port" value="18980"/>
+          <parameter key="retry" value="2"/>
+          <parameter key="timeout" value="3000"/>
+          <parameter key="collection" value="jsr160"/>
+          <parameter key="friendly-name" value="opennms-jvm"/>
+          <parameter key="thresholding-enabled" value="true"/>
+          <parameter key="factory" value="PASSWORD-CLEAR"/>
+          <parameter key="username" value="admin"/>
+          <parameter key="password" value="admin"/>
+        </service>
+        <service name="PostgreSQL" interval="30000" user-defined="false" status="on">
+          <parameter key="collection" value="PostgreSQL"/>
+          <parameter key="thresholding-enabled" value="true"/>
+          <parameter key="driver" value="org.postgresql.Driver"/>
+          <parameter key="user" value="postgres"/>
+          <parameter key="password" value="postgres"/>
+          <parameter key="url" value="jdbc:postgresql://OPENNMS_JDBC_HOSTNAME:5432/opennms"/>
+        </service>
+      </package>
+      <package name="cassandra-via-jmx" remote="false">
+        <filter>IPADDR != '0.0.0.0'</filter>
+    EOF
+    for i in $(seq 1 $cassandra_instances); do
+      cat <<EOF >> $cfg
+        <service name="JMX-Cassandra-I$i" interval="30000" user-defined="false" status="on">
+          <parameter key="port" value="7$${i}99"/>
+          <parameter key="retry" value="2"/>
+          <parameter key="timeout" value="3000"/>
+          <parameter key="protocol" value="rmi"/>
+          <parameter key="urlPath" value="/jmxrmi"/>
+          <parameter key="collection" value="jmx-cassandra30x"/>
+          <parameter key="friendly-name" value="cassandra-instance1"/>
+          <parameter key="thresholding-enabled" value="true"/>
+          <parameter key="factory" value="PASSWORD-CLEAR"/>
+          <parameter key="username" value="cassandra"/>
+          <parameter key="password" value="cassandra"/>
+        </service>
+        <service name="JMX-Cassandra-Newts-I$i" interval="30000" user-defined="false" status="on">
+          <parameter key="port" value="7$${i}99"/>
+          <parameter key="retry" value="2"/>
+          <parameter key="timeout" value="3000"/>
+          <parameter key="protocol" value="rmi"/>
+          <parameter key="urlPath" value="/jmxrmi"/>
+          <parameter key="collection" value="jmx-cassandra30x-newts"/>
+          <parameter key="friendly-name" value="cassandra-newts-instance2"/>
+          <parameter key="thresholding-enabled" value="true"/>
+          <parameter key="factory" value="PASSWORD-CLEAR"/>
+          <parameter key="username" value="cassandra"/>
+          <parameter key="password" value="cassandra"/>
+        </service>
+    EOF
+    done
+    cat <<EOF >> $cfg
+      </package>
+      <collector service="PostgreSQL" class-name="org.opennms.netmgt.collectd.JdbcCollector"/>
+      <collector service="SNMP" class-name="org.opennms.netmgt.collectd.SnmpCollector"/>
+      <collector service="OpenNMS-JVM" class-name="org.opennms.netmgt.collectd.Jsr160Collector"/>
+    EOF
+    for i in $(seq 1 $cassandra_instances); do
+      cat <<EOF >> $cfg
+      <collector service="JMX-Cassandra-I$i" class-name="org.opennms.netmgt.collectd.Jsr160Collector"/>
+      <collector service="JMX-Cassandra-Newts-I$i" class-name="org.opennms.netmgt.collectd.Jsr160Collector"/>
+    EOF
+    done
+    cat <<EOF >> $cfg
+    </collectd-configuration>
+    EOF
 
 - owner: root:root
   permissions: '0755'
@@ -603,4 +510,5 @@ runcmd:
 - yum install -y haveged
 - systemctl --now enable haveged
 - /tmp/setup.sh
+- /tmp/configure-jmx.sh
 - /tmp/requisition.sh
