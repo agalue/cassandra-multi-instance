@@ -111,8 +111,7 @@ write_files:
       'compaction_window_unit': '${compaction_window_unit}',
       'expired_sstable_check_frequency_seconds': '${expired_sstable_check}',
       'class':  'org.apache.cassandra.db.compaction.TimeWindowCompactionStrategy'
-    } AND gc_grace_seconds = ${gc_grace_seconds}
-      AND read_repair_chance = 0;
+    } AND gc_grace_seconds = ${gc_grace_seconds};
     CREATE TABLE IF NOT EXISTS ${newts_keyspace}.terms (
       context text,
       field text,
@@ -242,7 +241,6 @@ write_files:
       yum install -y java-11-openjdk
       echo 2 | alternatives --config java; echo
       echo 2 | alternatives --config python; echo
-      sed -i -r "s/AND read_repair_chance = 0//" /etc/cassandra/newts_tables.cql
     fi
 
 - owner: root:root
