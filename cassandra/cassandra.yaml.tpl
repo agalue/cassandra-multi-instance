@@ -159,6 +159,7 @@ write_files:
       echo "Error: you must run this script as root" >&2
       exit 4  # According to LSB: 4 - user had insufficient privileges
     fi
+    echo "### Bootstrapping Cassandra..."
     snitch="${endpoint_snitch}"
     instances=${number_of_instances}
     j=$(hostname | awk '{ print substr($0,length,1) }')
@@ -215,6 +216,7 @@ write_files:
       echo "Error: you must run this script as root" >&2
       exit 4  # According to LSB: 4 - user had insufficient privileges
     fi
+    echo "### Installing/Upgrading Cassandra..."
     repo_base="https://archive.apache.org/dist/cassandra"
     repo_ver="40x"
     if [[ "$version" == *"3.11."* ]]; then
@@ -254,11 +256,12 @@ write_files:
       echo "Error: you must run this script as root" >&2
       exit 4  # According to LSB: 4 - user had insufficient privileges
     fi
+    echo "### Configuring Cassandra Data Disks..."
     directories=("commitlog" "data" "hints" "saved_caches")
     data_location=/var/lib/cassandra
     log_location=/var/log/cassandra
     if [ -f "$data_location/.configured" ]; then
-      echo "Cassandra directories already configured.
+      echo "Cassandra directories already configured."
       exit
     fi
     if [ ! -f "/etc/fstab.bak" ]; then
@@ -305,6 +308,7 @@ write_files:
       echo "Error: you must run this script as root" >&2
       exit 4  # According to LSB: 4 - user had insufficient privileges
     fi
+    echo "### Configuring rsyslog..."
     rsyslog_file=/etc/rsyslog.d/cassandra.conf
     rm -f $rsyslog_file
     for i in $(seq 1 ${number_of_instances}); do
@@ -334,6 +338,7 @@ write_files:
       echo "Cassandra instances already configured."
       exit
     fi
+    echo "### Configuring Cassandra..."
     for i in $(seq 1 $instances); do
       # Instance Variables
       conf_dir=/etc/cassandra/node$i
