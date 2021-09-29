@@ -35,99 +35,99 @@ write_files:
         </rrd>
         <mbeans>
           <!-- Newts :: AllMemmtables -->
-          <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=AllMemtablesLiveDataSize">
+          <mbean name="org.apache.cassandra.metrics.Keyspace"
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=${newts_keyspace},name=AllMemtablesLiveDataSize">
             <attrib name="Value" alias="alMemTblLiDaSi" type="gauge"/>
           </mbean>
-          <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=AllMemtablesOffHeapDataSize">
+          <mbean name="org.apache.cassandra.metrics.Keyspace"
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=${newts_keyspace},name=AllMemtablesOffHeapDataSize">
             <attrib name="Value" alias="alMemTblOffHeapDaSi" type="gauge"/>
           </mbean>
-          <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=AllMemtablesOnHeapDataSize">
+          <mbean name="org.apache.cassandra.metrics.Keyspace"
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=${newts_keyspace},name=AllMemtablesOnHeapDataSize">
             <attrib name="Value" alias="alMemTblOnHeapDaSi" type="gauge"/>
           </mbean>
           <!-- Memtable :: Count -->
-          <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=MemtableSwitchCount">
+          <mbean name="org.apache.cassandra.metrics.Keyspace"
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=${newts_keyspace},name=MemtableSwitchCount">
             <attrib name="Value" alias="memTblSwitchCount" type="counter"/>
           </mbean>
-          <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=MemtableColumnsCount">
+          <mbean name="org.apache.cassandra.metrics.Keyspace"
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=${newts_keyspace},name=MemtableColumnsCount">
             <attrib name="Value" alias="memTblColumnsCnt" type="gauge"/>
           </mbean>
           <!-- Memtable :: Sizes -->
-          <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=MemtableLiveDataSize">
+          <mbean name="org.apache.cassandra.metrics.Keyspace"
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=${newts_keyspace},name=MemtableLiveDataSize">
             <attrib name="Value" alias="memTblLiveDaSi" type="gauge"/>
           </mbean>
-          <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=MemtableOffHeapDataSize">
+          <mbean name="org.apache.cassandra.metrics.Keyspace"
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=${newts_keyspace},name=MemtableOffHeapDataSize">
             <attrib name="Value" alias="memTblOffHeapDaSi" type="gauge"/>
           </mbean>
-          <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=MemtableOnHeapDataSize">
+          <mbean name="org.apache.cassandra.metrics.Keyspace"
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=${newts_keyspace},name=MemtableOnHeapDataSize">
             <attrib name="Value" alias="memTblOnHeapDaSi" type="gauge"/>
           </mbean>
           <!-- Latency -->
-          <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=ReadTotalLatency">
+          <mbean name="org.apache.cassandra.metrics.Keyspace"
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=${newts_keyspace},name=ReadTotalLatency">
             <attrib name="Count" alias="readTotLtncy" type="counter"/>
           </mbean>
-          <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=RangeLatency">
+          <mbean name="org.apache.cassandra.metrics.Keyspace"
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=${newts_keyspace},name=RangeLatency">
             <attrib name="99thPercentile" alias="rangeLtncy99" type="gauge"/>
           </mbean>
-          <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=WriteTotalLatency">
+          <mbean name="org.apache.cassandra.metrics.Keyspace"
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=${newts_keyspace},name=WriteTotalLatency">
             <attrib name="Count" alias="writeTotLtncy" type="counter"/>
           </mbean>
-          <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=CasCommitTotalLatency">
+          <mbean name="org.apache.cassandra.metrics.Keyspace"
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=${newts_keyspace},name=CasCommitTotalLatency">
             <attrib name="Count" alias="casCommitTotLtncy" type="counter"/>
           </mbean>
-          <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=CasPrepareTotalLatency">
+          <mbean name="org.apache.cassandra.metrics.Keyspace"
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=${newts_keyspace},name=CasPrepareTotalLatency">
             <attrib name="Count" alias="casPrepareTotLtncy" type="counter"/>
           </mbean>
-          <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=CasProposeTotalLatency">
+          <mbean name="org.apache.cassandra.metrics.Keyspace"
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=${newts_keyspace},name=CasProposeTotalLatency">
             <attrib name="Count" alias="casProposeTotLtncy" type="counter"/>
           </mbean>
           <!-- Bloom Filter -->
-          <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=BloomFilterDiskSpaceUsed">
+          <mbean name="org.apache.cassandra.metrics.Keyspace"
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=${newts_keyspace},name=BloomFilterDiskSpaceUsed">
             <attrib name="Value" alias="blmFltrDskSpcUsed" type="gauge"/>
           </mbean>
-          <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=BloomFilterOffHeapMemoryUsed">
+          <mbean name="org.apache.cassandra.metrics.Keyspace"
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=${newts_keyspace},name=BloomFilterOffHeapMemoryUsed">
             <attrib name="Value" alias="blmFltrOffHeapMemUs" type="gauge"/>
           </mbean>
           <!-- Memory Used -->
-          <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=CompressionMetadataOffHeapMemoryUsed">
+          <mbean name="org.apache.cassandra.metrics.Keyspace"
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=${newts_keyspace},name=CompressionMetadataOffHeapMemoryUsed">
             <attrib name="Value" alias="cmpMetaOffHeapMemUs" type="gauge"/>
           </mbean>
-          <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=IndexSummaryOffHeapMemoryUsed">
+          <mbean name="org.apache.cassandra.metrics.Keyspace"
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=${newts_keyspace},name=IndexSummaryOffHeapMemoryUsed">
             <attrib name="Value" alias="idxSumOffHeapMemUs" type="gauge"/>
           </mbean>
           <!-- Pending -->
-          <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=PendingCompactions">
+          <mbean name="org.apache.cassandra.metrics.Keyspace"
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=${newts_keyspace},name=PendingCompactions">
             <attrib name="Value" alias="pendingCompactions" type="gauge"/>
           </mbean>
-          <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=PendingFlushes">
+          <mbean name="org.apache.cassandra.metrics.Keyspace"
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=${newts_keyspace},name=PendingFlushes">
             <attrib name="Value" alias="pendingFlushes" type="gauge"/>
           </mbean>
           <!-- Disk Space -->
-          <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=TotalDiskSpaceUsed">
+          <mbean name="org.apache.cassandra.metrics.Keyspace"
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=${newts_keyspace},name=TotalDiskSpaceUsed">
             <attrib name="Value" alias="totalDiskSpaceUsed" type="gauge"/>
           </mbean>
-          <mbean name="org.apache.cassandra.metrics.Keyspace" resource-type="cassKeyspace"
-            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=*newts*,name=LiveDiskSpaceUsed">
+          <mbean name="org.apache.cassandra.metrics.Keyspace"
+            objectname="org.apache.cassandra.metrics:type=Keyspace,keyspace=${newts_keyspace},name=LiveDiskSpaceUsed">
             <attrib name="Value" alias="liveDiskSpaceUsed" type="gauge"/>
           </mbean>
         </mbeans>
@@ -140,18 +140,6 @@ write_files:
     enabled=false
     acknowledged-by=admin
     acknowledged-at=Mon Jan 01 00\:00\:00 EDT 2021
-
-- owner: root:root
-  path: /opt/opennms-etc-overlay/resource-types.d/cassandra-keyspaces.xml
-  content: |
-    <resource-types>
-      <resourceType name="cassKeyspace" label="Cassandra Keyspace" resourceLabel="$${index}">
-        <persistenceSelectorStrategy class="org.opennms.netmgt.collection.support.PersistAllSelectorStrategy"/>
-        <storageStrategy class="org.opennms.netmgt.dao.support.SiblingColumnStorageStrategy">
-          <parameter key="sibling-column-name" value="keyspace" />
-        </storageStrategy>
-      </resourceType>
-    </resource-types>
 
 - owner: root:root
   path: /opt/opennms-etc-overlay/opennms.properties.d/rrd.properties
@@ -412,7 +400,6 @@ write_files:
     sed -r -i "/JAVA_HEAP_SIZE/s/=.*/=$mem_in_mb/" /opt/opennms/etc/opennms.conf
     sed -r -i "/GCThreads=/s/1/$half_cores/" /opt/opennms/etc/opennms.conf
     sed -r -i "/writer_threads=/s/2/$num_cores/" /opt/opennms/etc/opennms.properties.d/newts.properties
-    sed -r -i "s/=interfaceSnmp/=cassKeyspace" /opt/opennms/etc/snmp-graph.properties.d/cassandra-newts-graph.properties
     # Monitor and collect metrics every 30 seconds from OpenNMS and Cassandra
     files=($(ls -l /opt/opennms/etc/*datacollection-config.xml | awk '{print $9}'))
     files+=($(ls -l /opt/opennms/etc/jmx-datacollection-config.d/*.xml | awk '{print $9}'))
