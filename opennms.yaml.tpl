@@ -486,7 +486,6 @@ write_files:
     done
     curl -u admin:admin -H 'Content-Type: application/xml' -d @$req $url/rest/requisitions
     curl -u admin:admin -H 'Content-Type: application/xml' -X PUT $url/rest/requisitions/Infrastructure/import
-done
 
 - owner: root:root
   permissions: '0400'
