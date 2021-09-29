@@ -308,9 +308,14 @@ write_files:
   content: |
     #!/bin/bash
     version="${version}"
+    cluster_name="${cluster_name}"
     snitch="${endpoint_snitch}"
     dynamic_snitch="${dynamic_snitch}"
+    num_tokens="${num_tokens}"
+    seed_host="${seed_host}"
+    dc_name="${dc_name}"
     instances=${number_of_instances}
+    conf_src=/etc/cassandra/conf
     if [[ "$(id -u -n)" != "root" ]]; then
       echo "Error: you must run this script as root" >&2
       exit 4  # According to LSB: 4 - user had insufficient privileges
@@ -321,7 +326,6 @@ write_files:
     fi
     for i in $(seq 1 $instances); do
       # Instance Variables
-      conf_src=/etc/cassandra/conf
       conf_dir=/etc/cassandra/node$i
       data_dir=/var/lib/cassandra/node$i
       log_dir=/var/log/cassandra/node$i
@@ -334,13 +338,13 @@ write_files:
       ipaddr=$(ifconfig $intf | grep 'inet[^6]' | awk '{print $2}')
       rsync -ar $conf_src/ $conf_dir/
       # Basic Configuration
-      sed -r -i "/cluster_name:/s/Test Cluster/${cluster_name}/" $conf_file
-      sed -r -i "/seeds:/s/127.0.0.1/${seed_host}/" $conf_file
+      sed -r -i "/cluster_name/s/: '.*'/: $cluster_name/" $conf_file
+      sed -r -i "/seeds:/s/127.0.0.1/$seed_host/" $conf_file
       sed -r -i "s/^listen_address/#listen_address/" $conf_file
       sed -r -i "s/^rpc_address/#rpc_address/" $conf_file
       sed -r -i "s/^# listen_interface: .*/listen_interface: $intf/" $conf_file
       sed -r -i "s/^# rpc_interface: .*/rpc_interface: $intf/" $conf_file
-      sed -r -i "/^endpoint_snitch:/s/SimpleSnitch/$snitch/" $conf_file
+      sed -r -i "/^endpoint_snitch/s/: .*/: $snitch/" $conf_file
       sed -r -i "/^endpoint_snitch:/a dynamic_snitch: $dynamic_snitch" $conf_file
       sed -r -i "s|hints_directory: .*|hints_directory: $data_dir/hints|" $conf_file
       sed -r -i "s|commitlog_directory: .*|commitlog_directory: $data_dir/commitlog|" $conf_file
@@ -349,13 +353,13 @@ write_files:
       # Performance Tuning
       cores=$(cat /proc/cpuinfo | grep "^processor" | wc -l)
       cpi=$(expr $cores / $instances)
-      sed -r -i "/num_tokens:/s/256/${num_tokens}/" $conf_file
-      sed -r -i "/enable_materialized_views:/s/true/false/" $conf_file
+      sed -r -i "/num_tokens/s/: .*/: $num_tokens/" $conf_file
+      sed -r -i "/enable_materialized_views/s/: .*/: false/" $conf_file
       sed -r -i "s/#concurrent_compactors: .*/concurrent_compactors: $cpi/" $conf_file
       # Network Topology (Infer rack from machine's hostname)
       if [[ "$snitch" != "SimpleSnitch" ]]; then
         index=$(hostname | awk '{ print substr($0,length,1) }')
-        sed -r -i "/^dc/s/=.*/=${dc_name}/" $rackdc_file
+        sed -r -i "/^dc/s/=.*/=$dc_name/" $rackdc_file
         sed -r -i "/^rack/s/=.*/=Rack$index/" $rackdc_file
       fi
       # Enable JMX Access
