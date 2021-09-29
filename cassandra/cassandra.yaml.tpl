@@ -138,6 +138,7 @@ write_files:
   path: /etc/cassandra/bootstrap.sh
   content: |
     #!/bin/bash
+    # WARNING: This script is designed to be executed once.
     # For SimpleSnitch starts one instance at a time in physical order.
     # For GossipingPropertyFileSnitch starts one instance at a time per server/rack.
     function wait_for_seed {
@@ -248,16 +249,21 @@ write_files:
   path: /etc/cassandra/configure_disks.sh
   content: |
     #!/bin/bash
+    # WARNING: This script is designed to be executed once.
     if [[ "$(id -u -n)" != "root" ]]; then
       echo "Error: you must run this script as root" >&2
       exit 4  # According to LSB: 4 - user had insufficient privileges
     fi
-    if [ ! -f "/etc/fstab.bak" ]; then
-      cp /etc/fstab /etc/fstab.bak
-    fi
     directories=("commitlog" "data" "hints" "saved_caches")
     data_location=/var/lib/cassandra
     log_location=/var/log/cassandra
+    if [ -f "$data_location/.configured" ]; then
+      echo "Cassandra directories already configured.
+      exit
+    fi
+    if [ ! -f "/etc/fstab.bak" ]; then
+      cp /etc/fstab /etc/fstab.bak
+    fi
     for i in $(seq 1 ${number_of_instances}); do
       disk=$(readlink -f /dev/disk/azure/scsi1/lun$(expr $i - 1))
       echo "Waiting for $disk to be ready"
@@ -272,6 +278,7 @@ write_files:
       mkdir -p $mount_point
       mkfs.xfs -f $${disk}1 $mount_point
       echo "$${disk}1 $mount_point xfs defaults,noatime 0 0" >> /etc/fstab
+      mount $mount_point
       echo "Configuring data directory for $${disk}1"
       location=$data_location/node$i
       ln -s /data/node$i $location
@@ -281,14 +288,19 @@ write_files:
       mkdir -p $log_location/node$i
       echo "disk $location" >> /etc/snmp/snmpd.conf
     done
+    for dir in "$${directories[@]}"; do
+      rmdir $data_location/$dir
+    done
     chown -R cassandra:cassandra /data
     chown -R cassandra:cassandra $log_location
+    touch $data_location/.configured
 
 - owner: root:root
   permissions: '0750'
   path: /etc/cassandra/configure_rsyslog.sh
   content: |
     #!/bin/bash
+    # WARNING: This script is designed to be executed once.
     if [[ "$(id -u -n)" != "root" ]]; then
       echo "Error: you must run this script as root" >&2
       exit 4  # According to LSB: 4 - user had insufficient privileges
@@ -319,7 +331,7 @@ write_files:
       exit 4  # According to LSB: 4 - user had insufficient privileges
     fi
     if [ -f "/etc/cassandra/.configured" ]; then
-      echo "Cassandra node already configured."
+      echo "Cassandra instances already configured."
       exit
     fi
     for i in $(seq 1 $instances); do
