@@ -29,6 +29,25 @@ variable "location" {
   default     = "eastus"
 }
 
+variable "num_vms" {
+  description = "The number of Cassandra Servers; it doesn't define the size of the cluster."
+  type        = number
+  default     = 3
+}
+
+variable "num_instances" {
+  description = "The number of Cassandra Instances per Server; must be less or equal to the available subnets, and less than 9."
+  type        = number
+  default     = 3
+
+  validation {
+    condition = (
+      var.num_instances <= 9
+    )
+    error_message = "The num_instances cannot be greater than 9."
+  }
+}
+
 variable "address_space" {
   description = "The Virtual Network Address Space."
   type        = string
@@ -38,7 +57,7 @@ variable "address_space" {
 # Each subnet CIDR must exist within the address_space of the chosen virtual network.
 # Due to how routing in Azure works, each NIC of each Cassandra VM would live on a different subnet.
 variable "subnets" {
-  description = "The subnet ranges for each Cassandra instance; the size determines the number of NICs per VM"
+  description = "The subnet ranges for each Cassandra instance; the size determines the number of NICs per VM (cannot have more than 9 elements)"
   type        = list(string)
   default     = [
     "14.0.1.0/24",
@@ -46,6 +65,12 @@ variable "subnets" {
     "14.0.3.0/24",
     "14.0.4.0/24"
   ]
+  validation {
+    condition = (
+      length(var.subnets) <= 9
+    )
+    error_message = "The subnets array cannot have more than 9 elements."
+  }
 }
 
 variable "vm_size" {
@@ -76,25 +101,6 @@ variable "os_image" {
     offer     = "CentOS"
     sku       = "8_4" # Either 8_4 or 7_9 depending on your needs
     version   = "latest"
-  }
-}
-
-variable "num_vms" {
-  description = "The number of Cassandra Servers; that doesn't define the size of the cluster."
-  type        = number
-  default     = 3
-}
-
-variable "num_instances" {
-  description = "The number of Cassandra Instances per Server; must be less or equal to the available subnets, and less than 9."
-  type        = number
-  default     = 3
-
-  validation {
-    condition = (
-      var.num_instances <= 9
-    )
-    error_message = "The num_instances cannot be greater than 9."
   }
 }
 
