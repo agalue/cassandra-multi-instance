@@ -111,13 +111,7 @@ UN  14.0.3.12  69.87 KiB  16      25.9%             6aaa99e1-56e5-403d-9d1f-e9ab
 UN  14.0.2.31  74.84 KiB  16      19.9%             be8a18d7-a9e5-420f-a403-3f0f14fbdae9  Rack3
 ```
 
-* The OpenNMS instance will wait only for the seed node to be ready before starting, so we recommend waiting until the whole cluster is ready before monitoring the infrastructure.
-
-* Import the requisition to collect JMX metrics from OpenNMS and the Cassandra servers every 30 seconds.
-
-```bash
-/opt/opennms/bin/provision.pl requisition import Infrastructure
-```
+* The OpenNMS instance will wait only for the seed node to be ready before starting. Then, after OpenNMS is up and running, a requisition to monitor the infrastructure every 30 seconds is imported automatically. It will take a while, but eventually, you'd have the Cassandra cluster and the OpenNMS server ready to go.
 
 * Connect to the Karaf Shell through SSH, ensuring the session won't die. Still, it is recommended to use `tmux` or `screen` if you're planning to leave the stress tool running constantly.
 
@@ -131,7 +125,7 @@ ssh -o ServerAliveInterval=10 -p 8101 admin@localhost
 opennms:stress-metrics -r 60 -n 15000 -f 20 -g 1 -a 100 -s 2 -t 100 -i 300
 ```
 
-  We recommend a ring buffer of 2097152 and a cache size of about 600000 for the above command.
+  We recommend a ring buffer of 2097152 and a cache size of about 600000 for the above command. Make sure the chosen hardware for Cassandra is powerful enough to handle the load, and remember that you get more IOPS with bigger disks.
 
 * Check the OpenNMS performance graphs to understand how it behaves. Additionally, you could check the Monitoring Tools on the Azure Console for each VM.
 
