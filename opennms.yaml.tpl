@@ -497,6 +497,7 @@ packages:
 - net-snmp-utils
 - epel-release
 - java-11-openjdk-devel
+- tmux
 
 runcmd:
 - systemctl enable --now snmpd

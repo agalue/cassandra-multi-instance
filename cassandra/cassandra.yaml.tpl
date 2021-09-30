@@ -450,6 +450,7 @@ write_files:
 packages:
 - net-snmp
 - net-snmp-utils
+- tmux
 
 runcmd:
 - sysctl --system
