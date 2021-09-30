@@ -137,7 +137,7 @@ opennms:stress-metrics -r 60 -n 15000 -f 20 -g 1 -a 100 -s 2 -t 100 -i 300
 
 ## Termination
 
-To destroy all the resources, you should execute the `terraform destroy` command with the same variables you used when executed `terraform apply`, for instance:
+To destroy all the resources, you should execute the `terraform destroy` command with the same parameters you used when executed `terraform apply`, for instance:
 
 ```bash
 terraform destroy -var "user=$USER"
@@ -150,4 +150,11 @@ terraform destroy \
   -var "user=$USER" \
   -var "resource_group_create=true" \
   -var "resource_group=OpenNMS"
+```
+
+Or,
+
+
+```bash
+terraform destroy -var-file="wrong-snitch.tfvars"
 ```
