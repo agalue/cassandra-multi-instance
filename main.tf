@@ -1,6 +1,6 @@
 
 locals {
-  seed_node = cidrhost(azurerm_subnet.main[0].address_prefixes[0], 10) # First instance on first VM
+  seed_node = cidrhost(azurerm_subnet.main[0].address_prefixes[0], 11) # First instance on first VM
   onms_vm_name = "${var.name_prefix}-onmscas1"
   required_tags = {
     Owner = "${var.user}"

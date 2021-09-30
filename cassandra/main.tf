@@ -20,7 +20,7 @@ resource "azurerm_network_interface" "cassandra" {
     name                          = "main"
     subnet_id                     = var.subnet_ids[count.index]
     private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(var.subnet_cidrs[count.index], substr(var.hostname, -1, 0) * 10 + count.index)
+    private_ip_address            = cidrhost(var.subnet_cidrs[count.index], substr(var.hostname, -1, 0) * 10 + count.index + 1)
     public_ip_address_id          = count.index == 0 ? azurerm_public_ip.cassandra.id : null
   }
 }
