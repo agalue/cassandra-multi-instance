@@ -491,9 +491,8 @@ packages:
 - java-11-openjdk-devel
 
 runcmd:
-- sysctl --system
 - systemctl enable --now snmpd
-- yum install -y haveged
+- yum install -y haveged jq
 - systemctl --now enable haveged
 - /tmp/setup.sh
 - /tmp/configure-jmx.sh
