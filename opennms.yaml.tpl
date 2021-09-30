@@ -7,10 +7,7 @@ write_files:
   content: |
     <foreign-source xmlns="http://xmlns.opennms.org/xsd/config/foreign-source" name="default" date-stamp="2021-03-31T00:00:00.000Z">
       <scan-interval>1d</scan-interval>
-      <detectors>
-        <detector name="ICMP" class="org.opennms.netmgt.provision.detector.icmp.IcmpDetector"/>
-        <detector name="SNMP" class="org.opennms.netmgt.provision.detector.snmp.SnmpDetector"/>
-      </detectors>
+      <detectors/>
       <policies>
         <policy name="NoDiscoveredIPs" class="org.opennms.netmgt.provision.persist.policies.MatchingIpInterfacePolicy">
           <parameter key="action" value="DO_NOT_PERSIST"/>
@@ -432,7 +429,10 @@ write_files:
     cat <<EOF > $req
     <model-import xmlns="http://xmlns.opennms.org/xsd/config/model-import" date-stamp="2018-04-01T11:00:00.000-04:00" foreign-source="Infrastructure">
       <node building="us-east-2" foreign-id="opennms" node-label="opennms-server">
-        <interface descr="eth0" ip-addr="$ipaddr" status="1" snmp-primary="P"/>
+        <interface descr="eth0" ip-addr="$ipaddr" status="1" snmp-primary="P">
+          <monitored-service service-name="ICMP"/>
+          <monitored-service service-name="SNMP"/>
+        </interface>
         <interface descr="loopback" ip-addr="127.0.0.1" status="1" snmp-primary="N">
           <monitored-service service-name="OpenNMS-JVM"/>
           <monitored-service service-name="PostgreSQL"/>
@@ -450,8 +450,16 @@ write_files:
         if [[ $${octets[3]} =~ ^$i.* ]] && [[ $intf -le $instances ]]; then
           cat <<EOF >> $req
         <interface descr="eth$((intf-1))" ip-addr="$ip" status="1" snmp-primary="$primary">
+          <monitored-service service-name="ICMP"/>
           <monitored-service service-name="JMX-Cassandra-I$intf"/>
           <monitored-service service-name="JMX-Cassandra-Newts-I$intf"/>
+    EOF
+          if [[ $primary == "P" ]]; then
+            cat <<EOF >> $req
+          <monitored-service service-name="SNMP"/>
+    EOF
+          fi
+          cat <<EOF >> $req
         </interface>
     EOF
           intf=$((intf+1))
