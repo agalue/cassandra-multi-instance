@@ -100,15 +100,15 @@ Datacenter: Main
 Status=Up/Down
 |/ State=Normal/Leaving/Joining/Moving
 --  Address    Load       Tokens  Owns (effective)  Host ID                               Rack
-UN  14.0.1.30  69.88 KiB  16      18.1%             fef21f6b-1fd9-4dcc-94f1-00507a1f7f01  Rack3
-UN  14.0.1.20  74.84 KiB  16      20.3%             05cbc8c2-c1bb-4ede-952f-ab2e5e4413be  Rack2
-UN  14.0.1.10  97.31 KiB  16      25.5%             9a73e602-9418-4eee-979c-95ce200477ad  Rack1
-UN  14.0.2.21  74.84 KiB  16      22.7%             37b29f7b-ae20-4cb5-8862-b92287cca939  Rack2
-UN  14.0.2.11  69.87 KiB  16      26.2%             e32bc4cd-a867-4537-905c-5afae94bbafe  Rack1
-UN  14.0.3.22  69.87 KiB  16      20.6%             0f8ae500-7ae3-45ef-9f9c-89c8ceed364c  Rack2
-UN  14.0.3.32  69.87 KiB  16      20.7%             d1b09b8e-bb61-4d58-b09f-9e92f59e69e7  Rack3
-UN  14.0.3.12  69.87 KiB  16      25.9%             6aaa99e1-56e5-403d-9d1f-e9ab32a52bc5  Rack1
-UN  14.0.2.31  74.84 KiB  16      19.9%             be8a18d7-a9e5-420f-a403-3f0f14fbdae9  Rack3
+UN  14.0.1.31  69.88 KiB  16      18.1%             fef21f6b-1fd9-4dcc-94f1-00507a1f7f01  Rack3
+UN  14.0.1.21  74.84 KiB  16      20.3%             05cbc8c2-c1bb-4ede-952f-ab2e5e4413be  Rack2
+UN  14.0.1.11  97.31 KiB  16      25.5%             9a73e602-9418-4eee-979c-95ce200477ad  Rack1
+UN  14.0.2.22  74.84 KiB  16      22.7%             37b29f7b-ae20-4cb5-8862-b92287cca939  Rack2
+UN  14.0.2.12  69.87 KiB  16      26.2%             e32bc4cd-a867-4537-905c-5afae94bbafe  Rack1
+UN  14.0.3.23  69.87 KiB  16      20.6%             0f8ae500-7ae3-45ef-9f9c-89c8ceed364c  Rack2
+UN  14.0.3.33  69.87 KiB  16      20.7%             d1b09b8e-bb61-4d58-b09f-9e92f59e69e7  Rack3
+UN  14.0.3.13  69.87 KiB  16      25.9%             6aaa99e1-56e5-403d-9d1f-e9ab32a52bc5  Rack1
+UN  14.0.2.32  74.84 KiB  16      19.9%             be8a18d7-a9e5-420f-a403-3f0f14fbdae9  Rack3
 ```
 
 * The OpenNMS instance will wait only for the seed node to be ready before starting. Then, after OpenNMS is up and running, a requisition to monitor the infrastructure every 30 seconds is imported automatically. It will take a while, but eventually, you'd have the Cassandra cluster and the OpenNMS server ready to go.
@@ -119,15 +119,13 @@ UN  14.0.2.31  74.84 KiB  16      19.9%             be8a18d7-a9e5-420f-a403-3f0f
 ssh -o ServerAliveInterval=10 -p 8101 admin@localhost
 ```
 
-* Execute the `opennms:stress-metrics` command. FOr example, the following generates 50000 samples per second:
+* Execute the `opennms:stress-metrics` command. FOr example, the following generates 100000 samples per second:
 
 ```bash
-opennms:stress-metrics -r 60 -n 15000 -f 20 -g 1 -a 50 -s 2 -t 100 -i 300
+opennms:stress-metrics -r 60 -n 15000 -f 20 -g 1 -a 100 -s 2 -t 100 -i 300
 ```
 
-  We recommend a ring buffer of 2097152 and a cache size of about 600000 for the above command. Make sure the chosen hardware for Cassandra is powerful enough to handle the load, and remember that you get more IOPS with bigger disks.
-
-  Make sure your Cassandra cluster and OpenNMS are powerful enough to handle that kind of load; otherwise, it is advised to reduce the settings. Preliminary tests indicate that you'd need instances with 32 Cores for OpenNMS and Cassandra for the above example.
+  We recommend a ring buffer of 2097152 and a cache size of about 800000 for the above command. Make sure the chosen hardware for Cassandra is powerful enough to handle the load (remember that you get more IOPS with bigger disks) Otherwise, it is advised to reduce the settings. Preliminary tests indicate that you'd need instances with 32 Cores for OpenNMS and Cassandra for the above example.
 
 * Check the OpenNMS performance graphs to understand how it behaves. Additionally, you could check the Monitoring Tools on the Azure Console for each VM.
 
