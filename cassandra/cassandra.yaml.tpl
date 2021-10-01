@@ -1,3 +1,8 @@
+#cloud-config
+
+# This is a Terraform template_file. It cannot be used directly as a cloud-init script.
+# https://registry.terraform.io/providers/hashicorp/template/latest/docs/data-sources/file
+
 package_upgrade: false
 timezone: America/New_York
 

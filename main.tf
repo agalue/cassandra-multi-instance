@@ -95,6 +95,8 @@ resource "azurerm_linux_virtual_machine" "opennms" {
   network_interface_ids = azurerm_network_interface.opennms[*].id
   tags                  = local.required_tags
 
+  allow_extension_operations = false
+
   admin_ssh_key {
     username   = var.user
     public_key = file("~/.ssh/id_rsa.pub")

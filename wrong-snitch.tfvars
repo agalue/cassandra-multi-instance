@@ -1,3 +1,4 @@
+# To guarantee 4 NICs and 4 Disks per Cassandra VM
 subnets = [
   "14.0.1.0/24",
   "14.0.2.0/24",
@@ -12,19 +13,19 @@ num_instances=3
 
 vm_size = {
   cassandra = "Standard_D48s_v4" # 48 Cores and 192 GB of RAM
-  opennms   = "Standard_D8s_v4"  #  8 Cores and  32 GB of RAM
+  opennms   = "Standard_D32s_v4" # 32 Cores and 128 GB of RAM
 }
 
 os_image = {
   publisher = "OpenLogic"
   offer     = "CentOS"
-  sku       = "7_9"
+  sku       = "8_4"
   version   = "latest"
 }
 
 cassandra_settings = {
   version                = "3.11.6"
-  disk_size              = 200
+  disk_size              = 500
   cluster_name           = "Test Production Newts"
   dc_name                = "datacenter1"
   endpoint_snitch        = "SimpleSnitch"
@@ -36,4 +37,11 @@ cassandra_settings = {
   compaction_window_unit = "DAYS"
   expired_sstable_check  = 86400
   gc_grace_seconds       = 604800
+}
+
+opennms_settings = {
+  newts_ttl            = 31540000
+  newts_resource_shard = 604800
+  ring_buffer_size     = 4194304
+  cache_max_entries    = 2000000
 }

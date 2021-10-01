@@ -73,6 +73,8 @@ resource "azurerm_linux_virtual_machine" "cassandra" {
   network_interface_ids = azurerm_network_interface.cassandra[*].id
   tags                  = var.required_tags
 
+  allow_extension_operations = false
+
   admin_ssh_key {
     username   = var.user
     public_key = file("~/.ssh/id_rsa.pub")
@@ -98,7 +100,7 @@ resource "azurerm_managed_disk" "cassandra" {
   resource_group_name  = var.resource_group
   tags                 = var.required_tags
   location             = var.location
-  storage_account_type = "Standard_LRS"
+  storage_account_type = "Premium_LRS"
   create_option        = "Empty"
   disk_size_gb         = var.settings.disk_size
 }
