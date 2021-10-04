@@ -16,7 +16,7 @@ module "cassandra" {
   subnet_cidrs   = azurerm_subnet.main[*].address_prefixes[0]
   nsg_id         = azurerm_network_security_group.main.id
   required_tags  = local.required_tags
-  hostname       = "${var.name_prefix}-cassandra${count.index + 1}" # It is important it ends with an integer starting with 1
+  hostname       = "${var.name_prefix}-cassandra${count.index + 1}" # Must end with an integer starting at 1
   user           = var.user
   vm_size        = var.vm_size.cassandra
   os_image       = var.os_image

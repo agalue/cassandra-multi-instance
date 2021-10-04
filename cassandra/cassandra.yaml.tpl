@@ -256,24 +256,25 @@ write_files:
   path: /etc/cassandra/configure_disks.sh
   content: |
     #!/bin/bash
-    # WARNING: This script is designed to be executed once.
     if [[ "$(id -u -n)" != "root" ]]; then
       echo "Error: you must run this script as root" >&2
       exit 4  # According to LSB: 4 - user had insufficient privileges
     fi
-    echo "### Configuring Cassandra Data Disks..."
     directories=("commitlog" "data" "hints" "saved_caches")
     data_location=/var/lib/cassandra
     log_location=/var/log/cassandra
-    if [ -f "$data_location/.configured" ]; then
-      echo "Cassandra directories already configured."
-      exit
-    fi
+    echo "### Configuring Cassandra Data Disks..."
     if [ ! -f "/etc/fstab.bak" ]; then
       cp /etc/fstab /etc/fstab.bak
     fi
     for i in $(seq 1 ${number_of_instances}); do
       disk=$(readlink -f /dev/disk/azure/scsi1/lun$(expr $i - 1))
+      dev=$${disk}1
+      if [ -e $dev ]; then
+        # This script is designed to be executed once per disk device
+        echo "Device $dev already configured, skipping."
+        continue
+      fi
       echo "Waiting for $disk to be ready"
       while [ ! -e $disk ]; do
         printf '.'
@@ -281,13 +282,13 @@ write_files:
       done
       echo "Configuring $disk"
       echo 'type=83' | sudo sfdisk $disk
-      mkfs -t xfs -f $${disk}1
+      mkfs -t xfs -f $dev
       mount_point=/data/node$i
       mkdir -p $mount_point
-      mkfs.xfs -f $${disk}1 $mount_point
-      echo "$${disk}1 $mount_point xfs defaults,noatime 0 0" >> /etc/fstab
+      mkfs.xfs -f $dev $mount_point
+      echo "$dev $mount_point xfs defaults,noatime 0 0" >> /etc/fstab
       mount $mount_point
-      echo "Configuring data directory for $${disk}1"
+      echo "Configuring data directory for $dev"
       location=$data_location/node$i
       ln -s /data/node$i $location
       for dir in "$${directories[@]}"; do
@@ -301,14 +302,12 @@ write_files:
     done
     chown -R cassandra:cassandra /data
     chown -R cassandra:cassandra $log_location
-    touch $data_location/.configured
 
 - owner: root:root
   permissions: '0750'
   path: /etc/cassandra/configure_rsyslog.sh
   content: |
     #!/bin/bash
-    # WARNING: This script is designed to be executed once.
     if [[ "$(id -u -n)" != "root" ]]; then
       echo "Error: you must run this script as root" >&2
       exit 4  # According to LSB: 4 - user had insufficient privileges
@@ -317,8 +316,11 @@ write_files:
     rsyslog_file=/etc/rsyslog.d/cassandra.conf
     rm -f $rsyslog_file
     for i in $(seq 1 ${number_of_instances}); do
+      id=cassandra-node$i
       log=/var/log/cassandra/node$i/cassandra.log
-      echo "if \$programname == 'cassandra-node$i' then $log" >> $rsyslog_file
+      if ! grep -Fxq "$id" $rsyslog_file; then
+        echo "if \$programname == '$id' then $log" >> $rsyslog_file
+      fi
     done
 
 - owner: root:root

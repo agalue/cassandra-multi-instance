@@ -122,10 +122,10 @@ variable "cassandra_settings" {
     gc_grace_seconds       = number
   })
   default ={
-    version                = "latest" # Either 'latest' or '4.0.1', '3.11.10', and so on.
-    disk_size              = 100 # Disk size in GB per Instance
+    version                = "latest" # Either 'latest' or '4.0.1', '3.11.10', and so on (avoid 3.11.11).
+    disk_size              = 100 # Disk size in GB per Cassandra Instance
     cluster_name           = "OpenNMS"
-    dc_name                = "Main"
+    dc_name                = "Main" # Valid when using GossipingPropertyFileSnitch
     endpoint_snitch        = "GossipingPropertyFileSnitch" # Either GossipingPropertyFileSnitch or SimpleSnitch
     dynamic_snitch         = false
     num_tokens             = 16
