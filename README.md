@@ -119,15 +119,33 @@ UN  14.0.2.32  74.84 KiB  16      19.9%             be8a18d7-a9e5-420f-a403-3f0f
 ssh -o ServerAliveInterval=10 -p 8101 admin@localhost
 ```
 
-* Execute the `opennms:stress-metrics` command. FOr example, the following generates 100000 samples per second:
+* Execute the `opennms:stress-metrics` command. FOr example, the following generates 50000 samples per second:
 
 ```bash
-opennms:stress-metrics -r 60 -n 15000 -f 20 -g 1 -a 100 -s 2 -t 100 -i 300
+opennms:stress-metrics -r 60 -n 15000 -f 20 -g 1 -a 50 -s 2 -t 100 -i 300
 ```
 
   We recommend a ring buffer of 2097152 and a cache size of about 800000 for the above command. Make sure the chosen hardware for Cassandra is powerful enough to handle the load (remember that you get more IOPS with bigger disks). Otherwise, we suggest reducing the settings to avoid overwhelming the servers. Preliminary tests indicate that you'd need instances with 32 Cores for OpenNMS and Cassandra for the above example.
 
 * Check the OpenNMS performance graphs to understand how it behaves. Additionally, you could check the Monitoring Tools on the Azure Console for each VM.
+
+## Troubleshooting
+
+If something goes wrong with the `cloud-init` script used to set up the Cassandra cluster or OpenNMS, you can do the following to track down the progress and errors.
+
+If you're using RHEL/CentOS 7:
+
+```bash=
+sudo grep cloud-init /var/log/messages | less
+```
+
+If you're using RHEL/CentOS 8:
+
+```bash=
+sudo less /var/log/messages/cloud-init-output.log
+```
+
+That's due to the version of `cloud-init` used on each distribution. I know there might be some limitations on what you can do due to the version mismatch, but the above should give you some hints on how to track problems.
 
 ## Termination
 

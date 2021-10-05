@@ -19,7 +19,7 @@ vm_size = {
 os_image = {
   publisher = "OpenLogic"
   offer     = "CentOS"
-  sku       = "8_4"
+  sku       = "7_9"
   version   = "latest"
 }
 
