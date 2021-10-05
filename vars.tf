@@ -29,12 +29,23 @@ variable "location" {
   default     = "eastus"
 }
 
+# The chosen IP addressing scheme prevents having more than 24 Servers in the cluster.
+# This limitation doesn't represent a problem for the Lab Environment.
 variable "num_vms" {
-  description = "The number of Cassandra Servers; it doesn't define the size of the cluster."
+  description = "The number of Cassandra Servers; it doesn't define the size of the cluster, and must be less than 24."
   type        = number
   default     = 3
+
+  validation {
+    condition = (
+      var.num_vms <= 24
+    )
+    error_message = "The num_vms cannot be greater than 24."
+  }
 }
 
+# The chosen IP addressing scheme prevents having more than 8 Instances per Server in the cluster.
+# This limitation doesn't represent a problem for the Lab Environment.
 variable "num_instances" {
   description = "The number of Cassandra Instances per Server; must be less or equal to the available subnets, and less than 8."
   type        = number
@@ -56,6 +67,7 @@ variable "address_space" {
 
 # Each subnet CIDR must exist within the address_space of the chosen virtual network.
 # Due to how routing in Azure works, each NIC of each Cassandra VM would live on a different subnet.
+# The chosen IP addressing scheme prevents having more than 8 subnets in the cluster.
 variable "subnets" {
   description = "The subnet ranges for each Cassandra instance; the size determines the number of NICs per VM (cannot have more than 8 elements)"
   type        = list(string)
@@ -86,8 +98,8 @@ variable "vm_size" {
 }
 
 # Must be consistent with the chosen Location/Region
-# Please avoid RedHat/RHEL due to some cloud-init issues with 7.9
-# Keep in mind that cloud-init in 7.9 is a lot slower than 8.4
+# Please avoid RedHat/RHEL or CentOS 7 due to some cloud-init issues
+# In general, cloud-init in 7.X is a lot slower than 8.x
 variable "os_image" {
   description = "The OS Image to use for OpenNMS and Cassandra."
   type = object({
