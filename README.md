@@ -133,13 +133,13 @@ opennms:stress-metrics -r 60 -n 15000 -f 20 -g 1 -a 50 -s 2 -t 100 -i 300
 
 If something goes wrong with the `cloud-init` script used to set up the Cassandra cluster or OpenNMS, you can do the following to track down the progress and errors.
 
-If you're using RHEL/CentOS 7:
+If you're using CentOS 7:
 
 ```bash=
 sudo grep cloud-init /var/log/messages | less
 ```
 
-If you're using RHEL/CentOS 8:
+If you're using CentOS 8:
 
 ```bash=
 sudo less /var/log/messages/cloud-init-output.log
