@@ -260,6 +260,7 @@ write_files:
       echo "Error: you must run this script as root" >&2
       exit 4  # According to LSB: 4 - user had insufficient privileges
     fi
+    disks=${number_of_instances}
     directories=("commitlog" "data" "hints" "saved_caches")
     data_location=/var/lib/cassandra
     log_location=/var/log/cassandra
@@ -267,7 +268,12 @@ write_files:
     if [ ! -f "/etc/fstab.bak" ]; then
       cp /etc/fstab /etc/fstab.bak
     fi
-    for i in $(seq 1 ${number_of_instances}); do
+    echo "Waiting for $disks disks to be available"
+    while [ $(ls -l /dev/disk/azure/scsi1 | grep lun | wc -l) -lt $disks ]; do
+        printf '.'
+      sleep 10
+    done
+    for i in $(seq 1 $disks); do
       disk=$(readlink -f /dev/disk/azure/scsi1/lun$(expr $i - 1))
       dev=$${disk}1
       if [ -e $dev ]; then
@@ -312,10 +318,11 @@ write_files:
       echo "Error: you must run this script as root" >&2
       exit 4  # According to LSB: 4 - user had insufficient privileges
     fi
+    instances=${number_of_instances}
     echo "### Configuring rsyslog..."
     rsyslog_file=/etc/rsyslog.d/cassandra.conf
     rm -f $rsyslog_file
-    for i in $(seq 1 ${number_of_instances}); do
+    for i in $(seq 1 $instances); do
       id=cassandra-node$i
       log=/var/log/cassandra/node$i/cassandra.log
       if ! grep -Fxq "$id" $rsyslog_file; then
@@ -358,8 +365,9 @@ write_files:
       rackdc_file=$conf_dir/cassandra-rackdc.properties
       intf="eth$(expr $i - 1)"
       ipaddr=$(ifconfig $intf | grep 'inet[^6]' | awk '{print $2}')
-      rsync -ar $conf_src/ $conf_dir/
-      # Basic Configuration
+      # Build Configuration Directory
+      rsync -avr --delete $conf_src/ $conf_dir/
+      # Apply Basic Configuration
       sed -r -i "/cluster_name/s/: '.*'/: $cluster_name/" $conf_file
       sed -r -i "/seeds:/s/127.0.0.1/$seed_host/" $conf_file
       sed -r -i "s/^listen_address/#listen_address/" $conf_file
@@ -372,13 +380,13 @@ write_files:
       sed -r -i "s|commitlog_directory: .*|commitlog_directory: $data_dir/commitlog|" $conf_file
       sed -r -i "s|saved_caches_directory: .*|saved_caches_directory: $data_dir/saved_caches|" $conf_file
       sed -r -i "s|/var/lib/cassandra/data|$data_dir/data|" $conf_file
-      # Performance Tuning
+      # Apply Basic Performance Tuning
       cores=$(cat /proc/cpuinfo | grep "^processor" | wc -l)
       cpi=$(expr $cores / $instances)
       sed -r -i "/num_tokens/s/: .*/: $num_tokens/" $conf_file
       sed -r -i "/enable_materialized_views/s/: .*/: false/" $conf_file
       sed -r -i "s/#concurrent_compactors: .*/concurrent_compactors: $cpi/" $conf_file
-      # Network Topology (Infer rack from machine's hostname)
+      # Apply Network Topology (Infer rack from machine's hostname)
       if [[ "$snitch" != "SimpleSnitch" ]]; then
         index=$(hostname | awk '{ print substr($0,length,1) }')
         sed -r -i "/^dc/s/=.*/=$dc_name/" $rackdc_file
