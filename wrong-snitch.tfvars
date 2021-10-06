@@ -33,9 +33,9 @@ cassandra_settings = {
   num_tokens             = 256
   replication_factor     = 2
   newts_keyspace         = "test_newts"
-  compaction_window_size = 7
-  compaction_window_unit = "DAYS"
-  expired_sstable_check  = 86400
+  compaction_window_size = 1
+  compaction_window_unit = "HOURS"
+  expired_sstable_check  = 5400
   gc_grace_seconds       = 604800
 }
 
