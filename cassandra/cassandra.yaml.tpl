@@ -287,7 +287,7 @@ write_files:
         sleep 10
       done
       echo "Configuring $disk"
-      echo 'type=83' | sudo sfdisk $disk
+      echo ';' | sfdisk $disk
       mkfs -t xfs -f $dev
       mount_point=/data/node$i
       mkdir -p $mount_point
