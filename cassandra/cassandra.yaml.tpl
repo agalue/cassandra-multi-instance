@@ -335,7 +335,7 @@ write_files:
   path: /etc/cassandra/configure_cassandra.sh
   content: |
     #!/bin/bash
-    version="${version}"
+    version=$(rpm -q --queryformat '%%{VERSION}' cassandra)
     cluster_name="${cluster_name}"
     snitch="${endpoint_snitch}"
     dynamic_snitch="${dynamic_snitch}"
