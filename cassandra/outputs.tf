@@ -4,3 +4,10 @@ output "ip_addresses" {
     intf.private_ip_address
   ]
 }
+
+output "interfaces" {
+  value = [
+    for intf in azurerm_network_interface.cassandra:
+    intf.name
+  ]
+}

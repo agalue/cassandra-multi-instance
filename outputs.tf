@@ -1,6 +1,7 @@
-output "cassandra" {
-  value = flatten([
-    for instance in module.cassandra:
-    instance.ip_addresses
-  ])
+output "cassandra_ipaddresses" {
+  value = module.cassandra.*.ip_addresses
+}
+
+output "cassandra_interfaces" {
+  value = module.cassandra.*.interfaces
 }
