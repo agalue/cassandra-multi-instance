@@ -70,10 +70,14 @@ resource "azurerm_linux_virtual_machine" "cassandra" {
   size                  = var.vm_size
   admin_username        = var.user
   custom_data           = data.template_cloudinit_config.cassandra.rendered
-  network_interface_ids = azurerm_network_interface.cassandra[*].id
+  network_interface_ids = azurerm_network_interface.cassandra.*.id
   tags                  = var.required_tags
 
   allow_extension_operations = false
+
+  depends_on = [
+    azurerm_network_interface_security_group_association.cassandra
+  ]
 
   admin_ssh_key {
     username   = var.user

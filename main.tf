@@ -92,10 +92,14 @@ resource "azurerm_linux_virtual_machine" "opennms" {
   size                  = var.vm_size.opennms
   admin_username        = var.user
   custom_data           = data.template_cloudinit_config.opennms.rendered
-  network_interface_ids = azurerm_network_interface.opennms[*].id
+  network_interface_ids = azurerm_network_interface.opennms.*.id
   tags                  = local.required_tags
 
   allow_extension_operations = false
+
+  depends_on = [
+    azurerm_network_interface_security_group_association.opennms
+  ]
 
   admin_ssh_key {
     username   = var.user
