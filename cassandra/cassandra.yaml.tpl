@@ -143,6 +143,7 @@ write_files:
   path: /etc/cassandra/bootstrap.sh
   content: |
     #!/bin/bash
+    set -x
     # WARNING: This script is designed to be executed once.
     # For SimpleSnitch starts one instance at a time in physical order.
     # For GossipingPropertyFileSnitch starts one instance at a time per server/rack.
@@ -216,6 +217,7 @@ write_files:
   path: /etc/cassandra/install.sh
   content: |
     #!/bin/bash
+    set -x
     version="${version}"
     if [ "$(id -u -n)" != "root" ]; then
       echo "Error: you must run this script as root" >&2
@@ -256,6 +258,7 @@ write_files:
   path: /etc/cassandra/configure_disks.sh
   content: |
     #!/bin/bash
+    set -x
     if [[ "$(id -u -n)" != "root" ]]; then
       echo "Error: you must run this script as root" >&2
       exit 4  # According to LSB: 4 - user had insufficient privileges
@@ -314,6 +317,7 @@ write_files:
   path: /etc/cassandra/configure_rsyslog.sh
   content: |
     #!/bin/bash
+    set -x
     if [[ "$(id -u -n)" != "root" ]]; then
       echo "Error: you must run this script as root" >&2
       exit 4  # According to LSB: 4 - user had insufficient privileges
@@ -335,6 +339,7 @@ write_files:
   path: /etc/cassandra/configure_cassandra.sh
   content: |
     #!/bin/bash
+    set -x
     version=$(rpm -q --queryformat '%%{VERSION}' cassandra)
     cluster_name="${cluster_name}"
     snitch="${endpoint_snitch}"

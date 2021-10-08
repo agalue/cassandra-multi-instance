@@ -196,6 +196,7 @@ write_files:
   path: /tmp/configure-jmx.sh
   content: |
     #!/bin/bash
+    set -x
     cassandra_instances=${cassandra_instances}
     cfg=/opt/opennms/etc/poller-configuration.xml
     cat <<EOF > $cfg
@@ -374,6 +375,7 @@ write_files:
   path: /tmp/setup.sh
   content: |
     #!/bin/bash
+    set -x
     if rpm -qa | grep -q opennms-core; then
       echo "OpenNMS is already installed."
       exit
@@ -426,6 +428,7 @@ write_files:
   path: /tmp/requisition.sh
   content: |
     #!/bin/bash
+    set -x
     servers=${cassandra_vms}
     instances=${cassandra_instances}
     IFS=',' read -r -a addresses <<< "${cassandra_addresses}"
