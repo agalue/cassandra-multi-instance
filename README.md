@@ -147,6 +147,29 @@ sudo less /var/log/messages/cloud-init-output.log
 
 That's due to the version of `cloud-init` used on each distribution. I know there might be some limitations on what you can do due to the version mismatch, but the above should give you some hints on how to track problems.
 
+Unfortunately, unlike AWS, Azure doesn't seem to be very reliable when creating, associating, and destroying resources, and order is not guaranteed. The Terraform recipes try to enforce things, but things can go sideways. The following outlines the correct deployment of the IP interfaces for the Cassandra cluster using the defaults:
+
+* Cassandra VM 1:
+  * eth0 ~ 14.0.1.11
+  * eth1 ~ 14.0.2.12
+  * eth2 ~ 14.0.3.13
+* Cassandra VM 2:
+  * eth0 ~ 14.0.1.21
+  * eth1 ~ 14.0.2.22
+  * eth2 ~ 14.0.3.23
+* Cassandra VM 3:
+  * eth0 ~ 14.0.1.31
+  * eth1 ~ 14.0.2.32
+  * eth2 ~ 14.0.3.33
+
+If you add more interfaces, it should follow the same order.
+
+If, after deploying everything, the result doesn't look like the above list, many things might not work, and unexpected behavior happens, so be advised.
+
+Each NIC lives on a different subnet because of Azure. In AWS, you could put them all in the same subnet, and everything will work, but it looks like things are different in Azure.
+
+The convention is the third octet denotes which Class-C subnet the NIC lives in, and the last octet contains information about the VM on which it is running (first digit) and the instance ID within the same VM (second digit). That is why we cannot have more than 8 Cassandra instances on the same server or more than 24 servers for this particular deployment.
+
 ## Termination
 
 To destroy all the resources, you should execute the `terraform destroy` command with the same parameters you used when executed `terraform apply`, for instance:
