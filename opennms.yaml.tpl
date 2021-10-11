@@ -196,9 +196,16 @@ write_files:
   path: /tmp/configure-jmx.sh
   content: |
     #!/bin/bash
-    set -x
-    cassandra_instances=${cassandra_instances}
-    cfg=/opt/opennms/etc/poller-configuration.xml
+    set -e
+
+    cassandra_instances="${cassandra_instances}"
+
+    if [[ "$(id -u -n)" != "root" ]]; then
+      echo "Error: you must run this script as root" >&2
+      exit 4  # According to LSB: 4 - user had insufficient privileges
+    fi
+
+    cfg="/opt/opennms/etc/poller-configuration.xml"
     cat <<EOF > $cfg
     <poller-configuration xmlns="http://xmlns.opennms.org/xsd/config/poller" threads="30" nextOutageId="SELECT nextval('outageNxtId')" serviceUnresponsiveEnabled="false" pathOutageEnabled="false">
       <node-outage status="on" pollAllIfNoCriticalServiceDefined="true">
@@ -238,6 +245,7 @@ write_files:
           <rra>RRA:AVERAGE:0.5:1:2016</rra>
         </rrd>
     EOF
+
     for i in $(seq 1 $cassandra_instances); do
       cat <<EOF >> $cfg
         <service name="JMX-Cassandra-I$i" interval="30000" user-defined="false" status="on">
@@ -273,7 +281,8 @@ write_files:
         </service>
     EOF
     done
-      cat <<EOF >> $cfg
+
+    cat <<EOF >> $cfg
         <downtime begin="0" end="300000" interval="30000"/><!-- 30s, 0, 5m -->
         <downtime begin="300000" end="43200000" interval="300000"/><!-- 5m, 5m, 12h -->
         <downtime begin="43200000" end="432000000" interval="600000"/><!-- 10m, 12h, 5d -->
@@ -282,16 +291,19 @@ write_files:
       <monitor service="ICMP" class-name="org.opennms.netmgt.poller.monitors.IcmpMonitor"/>
       <monitor service="OpenNMS-JVM" class-name="org.opennms.netmgt.poller.monitors.Jsr160Monitor"/>
     EOF
+
     for i in $(seq 1 $cassandra_instances); do
       cat <<EOF >> $cfg
       <monitor service="JMX-Cassandra-I$i" class-name="org.opennms.netmgt.poller.monitors.TcpMonitor"/>
       <monitor service="JMX-Cassandra-Newts-I$i" class-name="org.opennms.netmgt.poller.monitors.Jsr160Monitor"/>
     EOF
     done
+
     cat <<EOF >> $cfg
     </poller-configuration>
     EOF
-    cfg=/opt/opennms/etc/collectd-configuration.xml
+
+    cfg="/opt/opennms/etc/collectd-configuration.xml"
     cat <<EOF > $cfg
     <collectd-configuration xmlns="http://xmlns.opennms.org/xsd/config/collectd" threads="50">
       <package name="main" remote="false">
@@ -324,6 +336,7 @@ write_files:
       <package name="cassandra-via-jmx" remote="false">
         <filter>IPADDR != '0.0.0.0'</filter>
     EOF
+
     for i in $(seq 1 $cassandra_instances); do
       cat <<EOF >> $cfg
         <service name="JMX-Cassandra-I$i" interval="30000" user-defined="false" status="on">
@@ -354,18 +367,21 @@ write_files:
         </service>
     EOF
     done
+
     cat <<EOF >> $cfg
       </package>
       <collector service="PostgreSQL" class-name="org.opennms.netmgt.collectd.JdbcCollector"/>
       <collector service="SNMP" class-name="org.opennms.netmgt.collectd.SnmpCollector"/>
       <collector service="OpenNMS-JVM" class-name="org.opennms.netmgt.collectd.Jsr160Collector"/>
     EOF
+
     for i in $(seq 1 $cassandra_instances); do
       cat <<EOF >> $cfg
       <collector service="JMX-Cassandra-I$i" class-name="org.opennms.netmgt.collectd.Jsr160Collector"/>
       <collector service="JMX-Cassandra-Newts-I$i" class-name="org.opennms.netmgt.collectd.Jsr160Collector"/>
     EOF
     done
+
     cat <<EOF >> $cfg
     </collectd-configuration>
     EOF
@@ -375,25 +391,42 @@ write_files:
   path: /tmp/setup.sh
   content: |
     #!/bin/bash
-    set -x
+    set -e
+
+    cassandra_seed="${cassandra_seed}"
+
     if rpm -qa | grep -q opennms-core; then
       echo "OpenNMS is already installed."
       exit
     fi
+
+    if [[ "$(id -u -n)" != "root" ]]; then
+      echo "Error: you must run this script as root" >&2
+      exit 4  # According to LSB: 4 - user had insufficient privileges
+    fi
+
     . /etc/os-release
-    echo "Installing and configuring PostgreSQL"
+
+    echo "Installing PostgreSQL"
     yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-$VERSION_ID-x86_64/pgdg-redhat-repo-latest.noarch.rpm
     if [[ "$VERSION_ID" == "8" ]]; then
       dnf -qy module disable postgresql
     fi
     yum install -y postgresql12-server
+
+    echo "Configuring PostgreSQL"
     /usr/pgsql-12/bin/postgresql-12-setup initdb
     sed -r -i "/^(local|host)/s/(peer|ident)/trust/g" /var/lib/pgsql/12/data/pg_hba.conf
     systemctl --now enable postgresql-12
-    echo "Installing and configuring OpenNMS"
+
+    echo "Installing OpenNMS"
     yum install -y https://yum.opennms.org/repofiles/opennms-repo-stable-rhel$VERSION_ID.noarch.rpm
     yum install -y opennms-core opennms-webapp-jetty opennms-webapp-hawtio
+
+    echo "Copying base configuration"
     rsync -avr /opt/opennms-etc-overlay/ /opt/opennms/etc/
+
+    echo "Configuring JMX"
     num_cores=$(cat /proc/cpuinfo | grep "^processor" | wc -l)
     half_cores=$(expr $num_cores / 2)
     total_mem_in_mb=$(free -m | awk '/:/ {print $2;exit}')
@@ -404,7 +437,11 @@ write_files:
     sed -r -i "/JAVA_HEAP_SIZE/s/=.*/=$mem_in_mb/" /opt/opennms/etc/opennms.conf
     sed -r -i "/GCThreads=/s/1/$half_cores/" /opt/opennms/etc/opennms.conf
     sed -r -i "/writer_threads=/s/2/$num_cores/" /opt/opennms/etc/opennms.properties.d/newts.properties
-    # Monitor and collect metrics every 30 seconds from OpenNMS and Cassandra
+
+    echo "Configuring Pollerd and Collectd"
+    /tmp/configure-jmx.sh
+
+    echo "Monitor and collect metrics every 30 seconds from OpenNMS and Cassandra"
     files=($(ls -l /opt/opennms/etc/*datacollection-config.xml | awk '{print $9}'))
     files+=($(ls -l /opt/opennms/etc/jmx-datacollection-config.d/*.xml | awk '{print $9}'))
     for f in "$${files[@]}"; do
@@ -412,12 +449,14 @@ write_files:
         sed -r -i 's/step="300"/step="30"/g' $f
       fi
     done
+
     echo "Waiting for Cassandra"
-    until echo -n >/dev/tcp/${cassandra_seed}/9042 2>/dev/null; do
+    until echo -n >/dev/tcp/$cassandra_seed/9042 2>/dev/null; do
       printf '.'
       sleep 10
     done
     echo "done"
+
     echo "Starting OpenNMS"
     /opt/opennms/bin/runjava -s
     /opt/opennms/bin/install -dis
@@ -428,12 +467,14 @@ write_files:
   path: /tmp/requisition.sh
   content: |
     #!/bin/bash
-    set -x
+    set -e
+
     servers=${cassandra_vms}
     instances=${cassandra_instances}
     IFS=',' read -r -a addresses <<< "${cassandra_addresses}"
-    req=/tmp/Infrastructure.xml
     ipaddr=$(ifconfig eth0 | grep 'inet[^6]' | awk '{print $2}')
+
+    req=/tmp/Infrastructure.xml
     cat <<EOF > $req
     <model-import xmlns="http://xmlns.opennms.org/xsd/config/model-import" date-stamp="2018-04-01T11:00:00.000-04:00" foreign-source="Infrastructure">
       <node building="us-east-2" foreign-id="opennms" node-label="opennms-server">
@@ -447,13 +488,16 @@ write_files:
         </interface>
       </node>
     EOF
+
     for i in $(seq 1 $servers); do
       cat <<EOF >> $req
       <node foreign-id="cassandra$i" node-label="cassandra$i">
     EOF
+
       intf=1
       primary="P"
       for ip in "$${addresses[@]}"; do
+
         IFS='.' read -r -a octets <<< "$ip"
         if [[ $${octets[3]} =~ ^$i.* ]] && [[ $intf -le $instances ]]; then
           cat <<EOF >> $req
@@ -462,31 +506,38 @@ write_files:
           <monitored-service service-name="JMX-Cassandra-I$intf"/>
           <monitored-service service-name="JMX-Cassandra-Newts-I$intf"/>
     EOF
+
           if [[ $primary == "P" ]]; then
             cat <<EOF >> $req
           <monitored-service service-name="SNMP"/>
     EOF
+
           fi
           cat <<EOF >> $req
         </interface>
     EOF
+
           intf=$((intf+1))
           primary="N"
         fi
       done
+
       cat <<EOF >> $req
       </node>
     EOF
     done
+
     cat <<EOF >> $req
     </model-import>
     EOF
+
     echo "Waiting for OpenNMS to be ready"
     url=http://localhost:8980/opennms
     until $(curl --output /dev/null --silent --head --fail $url/login.jsp); do
       printf '.'
       sleep 5
     done
+
     curl -u admin:admin -H 'Content-Type: application/xml' -d @$req $url/rest/requisitions
     curl -u admin:admin -H 'Content-Type: application/xml' -X PUT $url/rest/requisitions/Infrastructure/import
 
@@ -512,5 +563,4 @@ runcmd:
 - yum install -y haveged jq
 - systemctl --now enable haveged
 - /tmp/setup.sh
-- /tmp/configure-jmx.sh
 - /tmp/requisition.sh

@@ -34,9 +34,11 @@ write_files:
     # For more information: https://tobert.github.io/tldr/cassandra-java-huge-pages.html
     [Unit]
     Description=Disable Transparent Huge Pages (THP)
+
     [Service]
     Type=simple
     ExecStart=/bin/sh -c "echo 'never' > /sys/kernel/mm/transparent_hugepage/enabled && echo 'never' > /sys/kernel/mm/transparent_hugepage/defrag"
+
     [Install]
     WantedBy=multi-user.target
 
@@ -48,6 +50,7 @@ write_files:
     Documentation=http://cassandra.apache.org
     Wants=network-online.target
     After=network-online.target
+
     [Service]
     Type=forking
     User=cassandra
@@ -64,8 +67,23 @@ write_files:
     LimitMEMLOCK=infinity
     LimitNPROC=32768
     LimitAS=infinity
+
     [Install]
     WantedBy=multi-user.target
+
+- owner: root:root
+  path: /etc/cassandra/current-resource-shard.py
+  content: |
+    #!/usr/bin/env python
+    from time import time
+
+    def round_down(num, divisor):
+      return num - (num%divisor)
+
+    SHARD = 604800 # see org.opennms.newts.config.resource_shard
+    now_ts = time()
+    partition = int(round_down(now_ts, SHARD))
+    print(partition)
 
 - owner: root:root
   path: /etc/cassandra/fix-schema.cql
@@ -74,10 +92,12 @@ write_files:
       'class' : 'NetworkTopologyStrategy',
       '${dc_name}' : ${replication_factor}
     };
+
     ALTER KEYSPACE system_distributed WITH REPLICATION = {
       'class' : 'NetworkTopologyStrategy',
       '${dc_name}' : ${replication_factor}
     };
+
     ALTER KEYSPACE system_traces WITH REPLICATION = {
       'class' : 'NetworkTopologyStrategy',
       '${dc_name}' : ${replication_factor}
@@ -117,6 +137,7 @@ write_files:
       'expired_sstable_check_frequency_seconds': '${expired_sstable_check}',
       'class':  'org.apache.cassandra.db.compaction.TimeWindowCompactionStrategy'
     } AND gc_grace_seconds = ${gc_grace_seconds};
+
     CREATE TABLE IF NOT EXISTS ${newts_keyspace}.terms (
       context text,
       field text,
@@ -124,6 +145,7 @@ write_files:
       resource text,
       PRIMARY KEY((context, field, value), resource)
     );
+
     CREATE TABLE IF NOT EXISTS ${newts_keyspace}.resource_attributes (
       context text,
       resource text,
@@ -131,6 +153,7 @@ write_files:
       value text,
       PRIMARY KEY((context, resource), attribute)
     );
+
     CREATE TABLE IF NOT EXISTS ${newts_keyspace}.resource_metrics (
       context text,
       resource text,
@@ -143,40 +166,64 @@ write_files:
   path: /etc/cassandra/bootstrap.sh
   content: |
     #!/bin/bash
-    set -x
+    set -e
+
     # WARNING: This script is designed to be executed once.
     # For SimpleSnitch starts one instance at a time in physical order.
     # For GossipingPropertyFileSnitch starts one instance at a time per server/rack.
+
+    # Global variables overridable via external parameters
+    instances="3"
+    snitch="GossipingPropertyFileSnitch"
+    seed_host="127.0.0.1"
+    while [ $# -gt 0 ]; do
+      if [[ $1 == *"--"* ]]; then
+        param="$${1/--/}"
+        declare $param="$2"
+      fi
+      shift
+    done
+
+    if [[ "$seed_host" == "127.0.0.1" ]]; then
+      echo "Please specify with seed_host."
+      exit
+    fi
+
     function wait_for_seed {
-      until echo -n >/dev/tcp/${seed_host}/9042 2>/dev/null; do
+      until echo -n >/dev/tcp/$seed_host/9042 2>/dev/null; do
         printf '.'
         sleep 10
       done
       echo "done"
     }
+
     function get_running_instances {
-      echo $(nodetool -u cassandra -pw cassandra -h ${seed_host} status | grep "^UN" | wc -l)
+      echo $(nodetool -u cassandra -pw cassandra -h $seed_host status | grep "^UN" | wc -l)
     }
+
     if [ ! -f "/etc/cassandra/.configured" ]; then
       echo "Cassandra is not configured."
       exit
     fi
+
     if [ "$(id -u -n)" != "root" ]; then
       echo "Error: you must run this script as root" >&2
       exit 4  # According to LSB: 4 - user had insufficient privileges
     fi
+
     echo "### Bootstrapping Cassandra..."
-    snitch="${endpoint_snitch}"
-    instances=${number_of_instances}
+
     j=$(hostname | awk '{ print substr($0,length,1) }')
+
     systemctl daemon-reload
     systemctl restart snmpd
-    systemctl restart rsyslog
     systemctl mask cassandra
+
     required_instances=0
     if [[ "$snitch" != "SimpleSnitch" ]]; then
       required_instances=$(($j - 1))
     fi
+
     for i in $(seq 1 $instances); do
       echo "Bootstrapping instance $i from server $j..."
       if [[ "$j" == "1" ]] && [[ "$i" == "1" ]]; then
@@ -207,6 +254,7 @@ write_files:
         echo "Starting cassandra..."
         systemctl enable --now cassandra3@node$i
       fi
+
       if [[ "$snitch" != "SimpleSnitch" ]]; then
         required_instances=$(($required_instances + $instances))
       fi
@@ -217,18 +265,31 @@ write_files:
   path: /etc/cassandra/install.sh
   content: |
     #!/bin/bash
-    set -x
-    version="${version}"
+    set -e
+
+    # Global variables overridable via external parameters
+    version="latest"
+    while [ $# -gt 0 ]; do
+      if [[ $1 == *"--"* ]]; then
+        param="$${1/--/}"
+        declare $param="$2"
+      fi
+      shift
+    done
+
     if [ "$(id -u -n)" != "root" ]; then
       echo "Error: you must run this script as root" >&2
       exit 4  # According to LSB: 4 - user had insufficient privileges
     fi
+
     echo "### Installing/Upgrading Cassandra..."
     repo_base="https://archive.apache.org/dist/cassandra"
+
     repo_ver="40x"
     if [[ "$version" == *"3.11."* ]]; then
       repo_ver="311x"
     fi
+
     if [[ "$version" == "latest" ]]; then
       cat <<EOF > /etc/yum.repos.d/cassandra.repo
     [cassandra]
@@ -244,6 +305,7 @@ write_files:
       suffix="$version-1.noarch.rpm"
       yum install -y $base/cassandra-$suffix $base/cassandra-tools-$suffix
     fi
+
     if [[ "$version" == *"3.11"* ]]; then
       yum install -y python2
       echo 3 | alternatives --config python; echo
@@ -258,37 +320,54 @@ write_files:
   path: /etc/cassandra/configure_disks.sh
   content: |
     #!/bin/bash
-    set -x
+    set -e
+
+    # Global variables overridable via external parameters
+    instances="3"
+    while [ $# -gt 0 ]; do
+      if [[ $1 == *"--"* ]]; then
+        param="$${1/--/}"
+        declare $param="$2"
+      fi
+      shift
+    done
+
     if [[ "$(id -u -n)" != "root" ]]; then
       echo "Error: you must run this script as root" >&2
       exit 4  # According to LSB: 4 - user had insufficient privileges
     fi
-    disks=${number_of_instances}
+
     directories=("commitlog" "data" "hints" "saved_caches")
     data_location=/var/lib/cassandra
     log_location=/var/log/cassandra
+
     echo "### Configuring Cassandra Data Disks..."
     if [ ! -f "/etc/fstab.bak" ]; then
       cp /etc/fstab /etc/fstab.bak
     fi
-    echo "Waiting for $disks disks to be available"
-    while [ $(ls -l /dev/disk/azure/scsi1 | grep lun | wc -l) -lt $disks ]; do
+
+    echo "Waiting for $instances disks to be available"
+    while [ $(ls -l /dev/disk/azure/scsi1 | grep lun | wc -l) -lt $instances ]; do
         printf '.'
       sleep 10
     done
-    for i in $(seq 1 $disks); do
+
+    for i in $(seq 1 $instances); do
       disk=$(readlink -f /dev/disk/azure/scsi1/lun$(expr $i - 1))
       dev=$${disk}1
+
       if [ -e $dev ]; then
-        # This script is designed to be executed once per disk device
+        # This script was designed to be executed once per disk device
         echo "Device $dev already configured, skipping."
         continue
       fi
+
       echo "Waiting for $disk to be ready"
       while [ ! -e $disk ]; do
         printf '.'
         sleep 10
       done
+
       echo "Configuring $disk"
       echo ';' | sfdisk $disk
       mkfs -t xfs -f $dev
@@ -297,18 +376,23 @@ write_files:
       mkfs.xfs -f $dev $mount_point
       echo "$dev $mount_point xfs defaults,noatime 0 0" >> /etc/fstab
       mount $mount_point
+
       echo "Configuring data directory for $dev"
       location=$data_location/node$i
       ln -s /data/node$i $location
       for dir in "$${directories[@]}"; do
         mkdir -p $location/$dir
       done
+
       mkdir -p $log_location/node$i
       echo "disk $location" >> /etc/snmp/snmpd.conf
     done
+
+    # Remove original data directories
     for dir in "$${directories[@]}"; do
-      rmdir $data_location/$dir
+      rmdir -rf $data_location/$dir
     done
+
     chown -R cassandra:cassandra /data
     chown -R cassandra:cassandra $log_location
 
@@ -317,12 +401,23 @@ write_files:
   path: /etc/cassandra/configure_rsyslog.sh
   content: |
     #!/bin/bash
-    set -x
+    set -e
+
+    # Global variables overridable via external parameters
+    instances="3"
+    while [ $# -gt 0 ]; do
+      if [[ $1 == *"--"* ]]; then
+        param="$${1/--/}"
+        declare $param="$2"
+      fi
+      shift
+    done
+
     if [[ "$(id -u -n)" != "root" ]]; then
       echo "Error: you must run this script as root" >&2
       exit 4  # According to LSB: 4 - user had insufficient privileges
     fi
-    instances=${number_of_instances}
+
     echo "### Configuring rsyslog..."
     rsyslog_file=/etc/rsyslog.d/cassandra.conf
     rm -f $rsyslog_file
@@ -334,31 +429,59 @@ write_files:
       fi
     done
 
+    systemctl restart rsyslog
+
 - owner: root:root
   permissions: '0750'
   path: /etc/cassandra/configure_cassandra.sh
   content: |
     #!/bin/bash
-    set -x
-    version=$(rpm -q --queryformat '%%{VERSION}' cassandra)
-    cluster_name="${cluster_name}"
-    snitch="${endpoint_snitch}"
-    dynamic_snitch="${dynamic_snitch}"
-    num_tokens="${num_tokens}"
-    seed_host="${seed_host}"
-    dc_name="${dc_name}"
-    instances=${number_of_instances}
-    conf_src=/etc/cassandra/conf
+    set -e
+
+    # Global variables overridable via external parameters
+    cluster_name="OpenNMS Cluster"
+    snitch="GossipingPropertyFileSnitch"
+    dynamic_snitch="true"
+    num_tokens="16"
+    seed_host="127.0.0.1"
+    dc_name="DC1"
+    instances="3"
+    while [ $# -gt 0 ]; do
+      if [[ $1 == *"--"* ]]; then
+        param="$${1/--/}"
+        declare $param="$2"
+      fi
+      shift
+    done
+
+    # Extracts the last digit from the hostname and use it to define the rack
+    # Alternatively, you can use the hostname as the rack name
+    function get_rack {
+      index=$(hostname | awk '{ print substr($0,length,1) }')
+      return "Rack$index"
+    }
+
     if [[ "$(id -u -n)" != "root" ]]; then
       echo "Error: you must run this script as root" >&2
       exit 4  # According to LSB: 4 - user had insufficient privileges
     fi
+
     if [ -f "/etc/cassandra/.configured" ]; then
       echo "Cassandra instances already configured."
       exit
     fi
+
+    if [[ "$seed_host" == "127.0.0.1" ]]; then
+      echo "Please specify with seed_host."
+      exit
+    fi
+
+    version=$(rpm -q --queryformat '%%{VERSION}' cassandra)
+    conf_src=/etc/cassandra/conf
+
     echo "### Configuring Cassandra..."
     for i in $(seq 1 $instances); do
+
       # Instance Variables
       conf_dir=/etc/cassandra/node$i
       data_dir=/var/lib/cassandra/node$i
@@ -370,8 +493,10 @@ write_files:
       rackdc_file=$conf_dir/cassandra-rackdc.properties
       intf="eth$(expr $i - 1)"
       ipaddr=$(ifconfig $intf | grep 'inet[^6]' | awk '{print $2}')
+
       # Build Configuration Directory
       rsync -avr --delete $conf_src/ $conf_dir/
+
       # Apply Basic Configuration
       sed -r -i "/cluster_name/s/: '.*'/: $cluster_name/" $conf_file
       sed -r -i "/seeds:/s/127.0.0.1/$seed_host/" $conf_file
@@ -385,18 +510,21 @@ write_files:
       sed -r -i "s|commitlog_directory: .*|commitlog_directory: $data_dir/commitlog|" $conf_file
       sed -r -i "s|saved_caches_directory: .*|saved_caches_directory: $data_dir/saved_caches|" $conf_file
       sed -r -i "s|/var/lib/cassandra/data|$data_dir/data|" $conf_file
+
       # Apply Basic Performance Tuning
       cores=$(cat /proc/cpuinfo | grep "^processor" | wc -l)
       cpi=$(expr $cores / $instances)
       sed -r -i "/num_tokens/s/: .*/: $num_tokens/" $conf_file
       sed -r -i "/enable_materialized_views/s/: .*/: false/" $conf_file
       sed -r -i "s/#concurrent_compactors: .*/concurrent_compactors: $cpi/" $conf_file
+
       # Apply Network Topology (Infer rack from machine's hostname)
       if [[ "$snitch" != "SimpleSnitch" ]]; then
         index=$(hostname | awk '{ print substr($0,length,1) }')
         sed -r -i "/^dc/s/=.*/=$dc_name/" $rackdc_file
-        sed -r -i "/^rack/s/=.*/=Rack$index/" $rackdc_file
+        sed -r -i "/^rack/s/=.*/=$(get_rack)/" $rackdc_file
       fi
+
       # Enable JMX Access
       sed -r -i "/rmi.server.hostname/s/.public name./$ipaddr/" $env_file
       sed -r -i "/rmi.server.hostname/s/^#//" $env_file
@@ -404,18 +532,22 @@ write_files:
       sed -r -i "/LOCAL_JMX=/s/yes/no/" $env_file
       sed -r -i "/^JMX_PORT/s/7199/7$${i}99/" $env_file
       sed -r -i "s|-Xloggc:.*.log|-Xloggc:$log_dir/gc.log|" $env_file
-      # Configure Heap (make sure it is consistent with the available RAM)
-      if [[ "$version" != *"3.11"* ]]; then
-        jvm_file="$conf_dir/jvm-server.options"
-      fi
+
+      # Calculate suggested heap size
       total_mem_in_mb=$(free -m | awk '/:/ {print $2;exit}')
       fraction=$(expr $instances \* 2)
       mem_in_mb=$(expr $total_mem_in_mb / $fraction)
       if [[ "$mem_in_mb" -gt "30720" ]]; then
         mem_in_mb="30720"
       fi
+
+      # Configure Heap (make sure it is consistent with the available RAM)
+      if [[ "$version" != *"3.11"* ]]; then
+        jvm_file="$conf_dir/jvm-server.options"
+      fi
       sed -r -i "s/#-Xms4G/-Xms$${mem_in_mb}M/" $jvm_file
       sed -r -i "s/#-Xmx4G/-Xmx$${mem_in_mb}M/" $jvm_file
+
       # Disable CMSGC and enable G1GC
       if [[ "$version" != *"3.11"* ]]; then
         jvm_file="$conf_dir/jvm11-server.options"
@@ -429,16 +561,42 @@ write_files:
         sed -r -i "/$entry/s/#-XX/-XX/" $jvm_file
       done
     done
+
     chown cassandra:cassandra /etc/cassandra/jmxremote.*
+
     # Make sure that CASSANDRA_CONF is not overriden
     infile=/usr/share/cassandra/cassandra.in.sh
     sed -r -i 's/^CASSANDRA_CONF/#CASSANDRA_CONF/' $infile
     echo 'if [ -z "$CASSANDRA_CONF" ]; then
       CASSANDRA_CONF=/etc/cassandra/conf
     fi' | cat - $infile > /tmp/_temp && mv /tmp/_temp $infile
+
     # Finish
     systemctl mask cassandra
     touch /etc/cassandra/.configured
+
+- owner: root:root
+  permissions: '0755'
+  path: /etc/cassandra/set_compaction_throughput.sh
+  content: |
+    #!/bin/bash
+    set -e
+
+    throughput="200"
+    instances="3"
+    while [ $# -gt 0 ]; do
+      if [[ $1 == *"--"* ]]; then
+        param="$${1/--/}"
+        declare $param="$2"
+      fi
+      shift
+    done
+
+    for i in $(seq 1 $instances); do
+      intf="eth$(expr $i - 1)"
+      ipaddr=$(ifconfig $intf | grep 'inet[^6]' | awk '{print $2}')
+      nodetool -u cassandra -pw cassandra -h $ipaddr -p 7$${i}99 setstreamthroughput -- $throughput
+    done
 
 - owner: root:root
   permissions: '0400'
@@ -477,8 +635,8 @@ runcmd:
 - systemctl daemon-reload
 - systemctl enable --now snmpd
 - systemctl enable --now disable-thp
-- /etc/cassandra/install.sh
-- /etc/cassandra/configure_disks.sh
-- /etc/cassandra/configure_rsyslog.sh
-- /etc/cassandra/configure_cassandra.sh
-- /etc/cassandra/bootstrap.sh
+- /etc/cassandra/install.sh --version ${version}
+- /etc/cassandra/configure_disks.sh --instances ${number_of_instances}
+- /etc/cassandra/configure_rsyslog.sh --instances ${number_of_instances}
+- /etc/cassandra/configure_cassandra.sh  --instances ${number_of_instances} --cluster_name "${cluster_name}" --snitch ${endpoint_snitch} --dynamic_snitch ${dynamic_snitch} --num_tokens ${num_tokens} --seed_host "${seed_host}" --dc_name "${dc_name}"
+- /etc/cassandra/bootstrap.sh --instances ${number_of_instances} --snitch ${endpoint_snitch} --seed_host "${seed_host}"
