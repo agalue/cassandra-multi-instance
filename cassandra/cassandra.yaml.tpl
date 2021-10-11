@@ -184,11 +184,6 @@ write_files:
       shift
     done
 
-    if [[ "$seed_host" == "127.0.0.1" ]]; then
-      echo "Please specify with seed_host."
-      exit
-    fi
-
     function wait_for_seed {
       until echo -n >/dev/tcp/$seed_host/9042 2>/dev/null; do
         printf '.'
@@ -202,7 +197,12 @@ write_files:
     }
 
     if [ ! -f "/etc/cassandra/.configured" ]; then
-      echo "Cassandra is not configured."
+      echo "The Cassandra instances are already configured. To reconfigure, please remove the /etc/cassandra/.configured file."
+      exit
+    fi
+
+    if [[ "$seed_host" == "127.0.0.1" ]]; then
+      echo "Please specify with seed_host."
       exit
     fi
 
@@ -211,13 +211,13 @@ write_files:
       exit 4  # According to LSB: 4 - user had insufficient privileges
     fi
 
-    echo "### Bootstrapping Cassandra..."
+    # Ensure the init.d version is not usable by an operator
+    systemctl mask cassandra
+    systemctl daemon-reload
+
+    echo "Bootstrapping Cassandra..."
 
     j=$(hostname | awk '{ print substr($0,length,1) }')
-
-    systemctl daemon-reload
-    systemctl restart snmpd
-    systemctl mask cassandra
 
     required_instances=0
     if [[ "$snitch" != "SimpleSnitch" ]]; then
@@ -227,6 +227,8 @@ write_files:
     for i in $(seq 1 $instances); do
       echo "Bootstrapping instance $i from server $j..."
       if [[ "$j" == "1" ]] && [[ "$i" == "1" ]]; then
+
+        # Processing seed node (the first instance of the first server)
         systemctl enable --now cassandra3@node$i
         wait_for_seed
         echo "Configuring keyspaces..."
@@ -237,7 +239,10 @@ write_files:
           cqlsh -f /etc/cassandra/newts_keyspace_nts.cql $(hostname)
         fi
         cqlsh -f /etc/cassandra/newts_tables.cql $(hostname)
+
       else
+
+        # Processing non-seed nodes
         wait_for_seed
         if [[ "$snitch" == "SimpleSnitch" ]]; then
           required_instances=$(($instances*($j-1) + ($i-1)))
@@ -282,13 +287,22 @@ write_files:
       exit 4  # According to LSB: 4 - user had insufficient privileges
     fi
 
-    echo "### Installing/Upgrading Cassandra..."
-    repo_base="https://archive.apache.org/dist/cassandra"
-
-    repo_ver="40x"
+    repo_ver=""
     if [[ "$version" == *"3.11."* ]]; then
       repo_ver="311x"
     fi
+    if [[ "$version" == *"4.0."* ]]; then
+      repo_ver="40x"
+    fi
+    if [[ "$repo_ver" == "" ]]; then
+      echo "Error: Only Cassandra 3.11.x or 4.0.x are supported".
+      exit
+    fi
+
+    # The archive repository contains all versions of Cassandra
+    repo_base="https://archive.apache.org/dist/cassandra"
+
+    echo "Installing/Upgrading Cassandra..."
 
     if [[ "$version" == "latest" ]]; then
       cat <<EOF > /etc/yum.repos.d/cassandra.repo
@@ -341,7 +355,6 @@ write_files:
     data_location=/var/lib/cassandra
     log_location=/var/log/cassandra
 
-    echo "### Configuring Cassandra Data Disks..."
     if [ ! -f "/etc/fstab.bak" ]; then
       cp /etc/fstab /etc/fstab.bak
     fi
@@ -352,6 +365,7 @@ write_files:
       sleep 10
     done
 
+    echo "Configuring Cassandra Data Disks..."
     for i in $(seq 1 $instances); do
       disk=$(readlink -f /dev/disk/azure/scsi1/lun$(expr $i - 1))
       dev=$${disk}1
@@ -383,8 +397,13 @@ write_files:
       for dir in "$${directories[@]}"; do
         mkdir -p $location/$dir
       done
+      chown -R cassandra:cassandra $mount_point
 
-      mkdir -p $log_location/node$i
+      echo "Configuring log directory for $dev"
+      log_dir=$log_location/node$i
+      mkdir -p $log_dir
+      chown -R cassandra:cassandra log_dir
+
       echo "disk $location" >> /etc/snmp/snmpd.conf
     done
 
@@ -393,8 +412,7 @@ write_files:
       rmdir -rf $data_location/$dir
     done
 
-    chown -R cassandra:cassandra /data
-    chown -R cassandra:cassandra $log_location
+    systemctl restart snmpd
 
 - owner: root:root
   permissions: '0750'
@@ -418,7 +436,7 @@ write_files:
       exit 4  # According to LSB: 4 - user had insufficient privileges
     fi
 
-    echo "### Configuring rsyslog..."
+    echo "Configuring rsyslog..."
     rsyslog_file=/etc/rsyslog.d/cassandra.conf
     rm -f $rsyslog_file
     for i in $(seq 1 $instances); do
@@ -461,25 +479,25 @@ write_files:
       return "Rack$index"
     }
 
+    if [ -f "/etc/cassandra/.configured" ]; then
+      echo "Warning: Cassandra instances already configured."
+      exit
+    fi
+
     if [[ "$(id -u -n)" != "root" ]]; then
       echo "Error: you must run this script as root" >&2
       exit 4  # According to LSB: 4 - user had insufficient privileges
     fi
 
-    if [ -f "/etc/cassandra/.configured" ]; then
-      echo "Cassandra instances already configured."
-      exit
-    fi
-
     if [[ "$seed_host" == "127.0.0.1" ]]; then
-      echo "Please specify with seed_host."
+      echo "Error: Please specify with seed_host."
       exit
     fi
 
     version=$(rpm -q --queryformat '%%{VERSION}' cassandra)
     conf_src=/etc/cassandra/conf
 
-    echo "### Configuring Cassandra..."
+    echo "Configuring Cassandra..."
     for i in $(seq 1 $instances); do
 
       # Instance Variables
