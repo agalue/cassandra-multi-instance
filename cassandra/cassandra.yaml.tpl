@@ -90,17 +90,17 @@ write_files:
   content: |
     ALTER KEYSPACE system_auth WITH REPLICATION = {
       'class' : 'NetworkTopologyStrategy',
-      '${dc_name}' : ${replication_factor}
+      '${dc_name}' : 1
     };
 
     ALTER KEYSPACE system_distributed WITH REPLICATION = {
       'class' : 'NetworkTopologyStrategy',
-      '${dc_name}' : ${replication_factor}
+      '${dc_name}' : 3
     };
 
     ALTER KEYSPACE system_traces WITH REPLICATION = {
       'class' : 'NetworkTopologyStrategy',
-      '${dc_name}' : ${replication_factor}
+      '${dc_name}' : 2
     };
 
 - owner: root:root
