@@ -325,7 +325,7 @@ write_files:
     if [[ "$version" == *"3.11."* ]]; then
       repo_ver="311x"
     fi
-    if [[ "$version" == *"4.0."* ]]; then
+    if [[ "$version" == *"4.0."* ]] || [[ "$version" == "latest" ]]; then
       repo_ver="40x"
     fi
     if [[ "$repo_ver" == "" ]]; then
