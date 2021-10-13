@@ -383,12 +383,7 @@ write_files:
     for i in $(seq 1 $instances); do
       disk=$(readlink -f /dev/disk/azure/scsi1/lun$(expr $i - 1))
       dev=$${disk}1
-
-      if [ -e $dev ]; then
-        # This script was designed to be executed once per disk device
-        echo "Device $dev already configured, skipping."
-        continue
-      fi
+      mount_point=/data/node$i
 
       echo "Waiting for $disk to be ready"
       while [ ! -e $disk ]; do
@@ -396,34 +391,56 @@ write_files:
         sleep 10
       done
 
-      echo "Configuring $disk"
-      echo ';' | sfdisk $disk
-      mkfs -t xfs -f $dev
-      mount_point=/data/node$i
+      if [ -e $dev ]; then
+        # This script was designed to be executed once per disk device
+        echo "Device $dev (disk $i) already configured and formatted"
+      else
+        echo "Formatting $disk (disk $i)"
+        echo ';' | sfdisk $disk
+        mkfs -t xfs -f $dev
+      fi
+
       mkdir -p $mount_point
-      mkfs.xfs -f $dev $mount_point
-      echo "$dev $mount_point xfs defaults,noatime 0 0" >> /etc/fstab
-      mount $mount_point
+      if grep -qs $mount_point /proc/mounts; then
+        echo "$dev (disk $i) already mounted at $mount_point"
+      else
+        echo "Mounting $dev (disk $i) at $mount_point"
+        echo "$dev $mount_point xfs defaults,noatime 0 0" >> /etc/fstab
+        mount $mount_point
+      fi
 
-      echo "Configuring data directory for $dev"
       location=$data_location/node$i
-      ln -s /data/node$i $location
-      for dir in "$${directories[@]}"; do
-        mkdir -p $location/$dir
-      done
-      chown -R cassandra:cassandra $mount_point
+      if [ -L $location ]; then
+        echo "Data directory for $dev (disk $i) already configured"
+      else
+        echo "Configuring data directory for $dev (disk $i)"
+        ln -s /data/node$i $location
+        for dir in "$${directories[@]}"; do
+          mkdir -p $location/$dir
+        done
+        chown -R cassandra:cassandra $mount_point
+      fi
 
-      echo "Configuring log directory for $dev"
       log_dir=$log_location/node$i
-      mkdir -p $log_dir
-      chown -R cassandra:cassandra log_dir
+      if [ -e $log_dir ]; then
+        echo "Log directory for $dev (disk $i) already configured"
+      else
+        echo "Configuring log directory for $dev (disk $i)"
+        mkdir -p $log_dir
+        chown -R cassandra:cassandra log_dir
+      fi
 
-      echo "disk $location" >> /etc/snmp/snmpd.conf
+      if grep -qs $location /etc/snmp/snmpd.conf; then
+        echo "SNMP monitoring for $location (disk $i) already configured"
+      else
+        echo "Configuring SNMP monitoring for $location (disk $i)"
+        echo "disk $location" >> /etc/snmp/snmpd.conf
+      fi
     done
 
     # Remove original data directories
     for dir in "$${directories[@]}"; do
-      rmdir -rf $data_location/$dir
+      rm -rf $data_location/$dir
     done
 
     systemctl restart snmpd
@@ -463,9 +480,7 @@ write_files:
     for i in $(seq 1 $instances); do
       id=cassandra-node$i
       log=/var/log/cassandra/node$i/cassandra.log
-      if ! grep -Fxq "$id" $rsyslog_file; then
-        echo "if \$programname == '$id' then $log" >> $rsyslog_file
-      fi
+      echo "if \$programname == '$id' then $log" >> $rsyslog_file
     done
 
     systemctl restart rsyslog
@@ -475,7 +490,6 @@ write_files:
   path: /etc/cassandra/configure_cassandra.sh
   content: |
     #!/bin/bash
-    set -e
 
     # Global variables overridable via external parameters
     cluster_name="OpenNMS Cluster"
@@ -525,9 +539,8 @@ write_files:
     version=$(rpm -q --queryformat '%%{VERSION}' cassandra)
     conf_src=/etc/cassandra/conf
 
-    echo "Configuring Cassandra..."
+    echo "Configuring $instances instances of Cassandra..."
     for i in $(seq 1 $instances); do
-
       # Instance Variables
       conf_dir=/etc/cassandra/node$i
       data_dir=/var/lib/cassandra/node$i
@@ -539,6 +552,8 @@ write_files:
       rackdc_file=$conf_dir/cassandra-rackdc.properties
       intf="eth$(expr $i - 1)"
       ipaddr=$(ifconfig $intf | grep 'inet[^6]' | awk '{print $2}')
+
+      echo "Configuring Cassandra Instance $i ($intf : $ipaddr)..."
 
       # Build Configuration Directory
       rsync -avr --delete $conf_src/ $conf_dir/
