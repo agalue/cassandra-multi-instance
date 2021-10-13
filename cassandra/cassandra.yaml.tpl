@@ -166,7 +166,6 @@ write_files:
   path: /etc/cassandra/bootstrap.sh
   content: |
     #!/bin/bash
-    set -e
 
     # WARNING: This script is designed to be executed once.
     # For SimpleSnitch starts one instance at a time in physical order.
@@ -291,7 +290,6 @@ write_files:
   path: /etc/cassandra/install.sh
   content: |
     #!/bin/bash
-    set -e
 
     # Global variables overridable via external parameters
     version="latest"
@@ -368,7 +366,6 @@ write_files:
   path: /etc/cassandra/configure_disks.sh
   content: |
     #!/bin/bash
-    set -e
 
     # Global variables overridable via external parameters
     instances="3"
@@ -489,7 +486,6 @@ write_files:
   path: /etc/cassandra/configure_rsyslog.sh
   content: |
     #!/bin/bash
-    set -e
 
     # Global variables overridable via external parameters
     instances="3"
@@ -713,7 +709,6 @@ write_files:
   path: /etc/cassandra/set_compaction_throughput.sh
   content: |
     #!/bin/bash
-    set -e
 
     # External Variables
     throughput="200"
