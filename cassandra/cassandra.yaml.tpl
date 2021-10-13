@@ -466,11 +466,11 @@ write_files:
         chown -R cassandra:cassandra log_dir
       fi
 
-      if grep -qs $location /etc/snmp/snmpd.conf; then
-        echo "SNMP monitoring for $location (disk $i) already configured"
+      if grep -qs $mount_point /etc/snmp/snmpd.conf; then
+        echo "SNMP monitoring for $mount_point (disk $i) already configured"
       else
-        echo "Configuring SNMP monitoring for $location (disk $i)"
-        echo "disk $location" >> /etc/snmp/snmpd.conf
+        echo "Configuring SNMP monitoring for $mount_point (disk $i)"
+        echo "disk $mount_point" >> /etc/snmp/snmpd.conf
       fi
     done
 
