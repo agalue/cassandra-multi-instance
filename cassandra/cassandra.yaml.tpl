@@ -176,6 +176,20 @@ write_files:
     instances="3"
     snitch="GossipingPropertyFileSnitch"
     seed_host="127.0.0.1"
+
+    if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+      cat <<EOF
+    $0 [options]
+
+    Options:
+    --instances  number  The number of Cassandra instances to run on this server [default: $instances]
+    --snitch     string  The value for endpoint_snitch [default: $snitch]
+    --seed_host  string  The IP address of the seed node [default: $seed_host]
+    EOF
+      exit
+    fi
+
+    # Parse external variables
     while [ $# -gt 0 ]; do
       if [[ $1 == *"--"* ]]; then
         param="$${1/--/}"
@@ -281,6 +295,19 @@ write_files:
 
     # Global variables overridable via external parameters
     version="latest"
+
+    if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+      cat <<EOF
+    $0 [options]
+
+    Options:
+    --version  string  The version of Cassandra to use [default: $version]
+                       For instance: 3.11.10, 4.0.1 or latest.
+    EOF
+      exit
+    fi
+
+    # Parse external variables
     while [ $# -gt 0 ]; do
       if [[ $1 == *"--"* ]]; then
         param="$${1/--/}"
@@ -345,6 +372,18 @@ write_files:
 
     # Global variables overridable via external parameters
     instances="3"
+
+    if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+      cat <<EOF
+    $0 [options]
+
+    Options:
+    --instances  number  The number of Cassandra instances to run on this server [default: $instances]
+    EOF
+      exit
+    fi
+
+    # Parse external variables
     while [ $# -gt 0 ]; do
       if [[ $1 == *"--"* ]]; then
         param="$${1/--/}"
@@ -454,6 +493,18 @@ write_files:
 
     # Global variables overridable via external parameters
     instances="3"
+
+    if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+      cat <<EOF
+    $0 [options]
+
+    Options:
+    --instances  number  The number of Cassandra instances to run on this server [default: $instances]
+    EOF
+      exit
+    fi
+
+    # Parse external variables
     while [ $# -gt 0 ]; do
       if [[ $1 == *"--"* ]]; then
         param="$${1/--/}"
@@ -499,6 +550,27 @@ write_files:
     seed_host="127.0.0.1"
     dc_name="DC1"
     instances="3"
+
+    if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+      cat <<EOF
+    $0 [options]
+
+    Options:
+    --instances      number  The number of Cassandra instances to run on this server [default: $instances]
+    --cluster_name   string  The name of the Cassandra cluster [default: $cluster_name]
+                             Must be the same for all its members
+    --snitch         string  The value for endpoint_snitch [default: $snitch]
+                             Must be the same for all its members
+    --num_tokens     string  The number of tokens for vnodes [default: $num_tokens]
+                             Must be the same for all its members
+    --dynamic_snitch bool    true to enable dynamic snitch, false otherwise [default: $dynamic_snitch]
+    --seed_host      string  The IP address of the seed node [default: $seed_host]
+    --dc_name        string  The name of the Datacenter to use when using NTS [default: $dc_name]
+    EOF
+      exit
+    fi
+
+    # Parse external variables
     while [ $# -gt 0 ]; do
       if [[ $1 == *"--"* ]]; then
         param="$${1/--/}"
@@ -643,8 +715,22 @@ write_files:
     #!/bin/bash
     set -e
 
+    # External Variables
     throughput="200"
     instances="3"
+
+    if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+      cat <<EOF
+    $0 [options]
+
+    Options:
+    --instances  number  The number of Cassandra instances to run on this server [default: $instances]
+    --throughput number  The desired throughput in Mbps [default: $throughput]
+    EOF
+      exit
+    fi
+
+    # Parse external variables
     while [ $# -gt 0 ]; do
       if [[ $1 == *"--"* ]]; then
         param="$${1/--/}"
@@ -672,7 +758,24 @@ write_files:
   content: |
     #!/bin/bash
 
+    # External Variables
     instance=""
+
+    if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+      cat <<EOF
+    $0 [options] [nodetool commands and arguments]
+
+    Options:
+    --instance  number  The ID of the target Cassandra instance to use with the nodetool command
+
+    Examples:
+    $0 --instance 1 status
+    $0 --instance 2 setstreamthroughput 400
+    EOF
+      exit
+    fi
+
+    # Parse external variables
     if [[ $1 == *"--"* ]]; then
       param="$${1/--/}"
       declare $param="$2"
