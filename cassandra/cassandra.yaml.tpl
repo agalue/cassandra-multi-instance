@@ -463,7 +463,7 @@ write_files:
       else
         echo "Configuring log directory for $dev (disk $i)"
         mkdir -p $log_dir
-        chown -R cassandra:cassandra log_dir
+        chown -R cassandra:cassandra $log_dir
       fi
 
       if grep -qs $mount_point /etc/snmp/snmpd.conf; then
