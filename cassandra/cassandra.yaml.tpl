@@ -823,8 +823,10 @@ packages:
 - net-snmp
 - net-snmp-utils
 - tmux
+- epel-release
 
 runcmd:
+- yum install -y jq
 - sysctl --system
 - systemctl daemon-reload
 - systemctl enable --now snmpd
