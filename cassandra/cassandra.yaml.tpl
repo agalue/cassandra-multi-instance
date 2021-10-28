@@ -172,6 +172,7 @@ write_files:
     # For GossipingPropertyFileSnitch starts one instance at a time per server/rack.
 
     # Global variables overridable via external parameters
+    intf_prefix="eth"
     instances="3"
     snitch="GossipingPropertyFileSnitch"
     seed_host="127.0.0.1"
@@ -181,9 +182,10 @@ write_files:
     $0 [options]
 
     Options:
-    --instances  number  The number of Cassandra instances to run on this server [default: $instances]
-    --snitch     string  The value for endpoint_snitch [default: $snitch]
-    --seed_host  string  The IP address of the seed node [default: $seed_host]
+    --intf_prefix string  The interface prefix (assuming consecutive order) [default: $intf_prefix]
+    --instances   number  The number of Cassandra instances to run on this server [default: $instances]
+    --snitch      string  The value for endpoint_snitch [default: $snitch]
+    --seed_host   string  The IP address of the seed node [default: $seed_host]
     EOF
       exit
     fi
@@ -220,7 +222,7 @@ write_files:
     fi
 
     re='^[0-9]+$'
-    available=$(ip a | grep "^[0-9]: eth" | wc -l)
+    available=$(ip a | grep "^[0-9]: $intf_prefix" | wc -l)
     if ! [[ $instances =~ $re ]] || [[ $instances > $available ]] || [[ $instances < 1 ]]; then
       echo "Error: please provide a number of instances between 1 and $available"
       exit 1
@@ -368,6 +370,7 @@ write_files:
     #!/bin/bash
 
     # Global variables overridable via external parameters
+    intf_prefix="eth"
     instances="3"
 
     if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
@@ -375,7 +378,8 @@ write_files:
     $0 [options]
 
     Options:
-    --instances  number  The number of Cassandra instances to run on this server [default: $instances]
+    --intf_prefix string  The interface prefix (assuming consecutive order) [default: $intf_prefix]
+    --instances   number  The number of Cassandra instances to run on this server [default: $instances]
     EOF
       exit
     fi
@@ -395,7 +399,7 @@ write_files:
     fi
 
     re='^[0-9]+$'
-    available=$(ip a | grep "^[0-9]: eth" | wc -l)
+    available=$(ip a | grep "^[0-9]: $intf_prefix" | wc -l)
     if ! [[ $instances =~ $re ]] || [[ $instances > $available ]] || [[ $instances < 1 ]]; then
       echo "Error: please provide a number of instances between 1 and $available"
       exit 1
@@ -488,6 +492,7 @@ write_files:
     #!/bin/bash
 
     # Global variables overridable via external parameters
+    intf_prefix="eth"
     instances="3"
 
     if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
@@ -495,7 +500,8 @@ write_files:
     $0 [options]
 
     Options:
-    --instances  number  The number of Cassandra instances to run on this server [default: $instances]
+    --intf_prefix string  The interface prefix (assuming consecutive order) [default: $intf_prefix]
+    --instances   number  The number of Cassandra instances to run on this server [default: $instances]
     EOF
       exit
     fi
@@ -515,7 +521,7 @@ write_files:
     fi
 
     re='^[0-9]+$'
-    available=$(ip a | grep "^[0-9]: eth" | wc -l)
+    available=$(ip a | grep "^[0-9]: $intf_prefix" | wc -l)
     if ! [[ $instances =~ $re ]] || [[ $instances > $available ]] || [[ $instances < 1 ]]; then
       echo "Error: please provide a number of instances between 1 and $available"
       exit 1
@@ -539,6 +545,7 @@ write_files:
     #!/bin/bash
 
     # Global variables overridable via external parameters
+    intf_prefix="eth"
     cluster_name="OpenNMS Cluster"
     snitch="GossipingPropertyFileSnitch"
     dynamic_snitch="true"
@@ -552,6 +559,7 @@ write_files:
     $0 [options]
 
     Options:
+    --intf_prefix    string  The interface prefix (assuming consecutive order) [default: $intf_prefix]
     --instances      number  The number of Cassandra instances to run on this server [default: $instances]
     --cluster_name   string  The name of the Cassandra cluster [default: $cluster_name]
                              Must be the same for all its members
@@ -593,7 +601,7 @@ write_files:
     fi
 
     re='^[0-9]+$'
-    available=$(ip a | grep "^[0-9]: eth" | wc -l)
+    available=$(ip a | grep "^[0-9]: $intf_prefix" | wc -l)
     if ! [[ $instances =~ $re ]] || [[ $instances > $available ]] || [[ $instances < 1 ]]; then
       echo "Error: please provide a number of instances between 1 and $available"
       exit 1
@@ -618,7 +626,7 @@ write_files:
       jvm_file=$conf_dir/jvm.options
       log_file=$conf_dir/logback.xml
       rackdc_file=$conf_dir/cassandra-rackdc.properties
-      intf="eth$(expr $i - 1)"
+      intf="$intf_prefix$(expr $i - 1)"
       ipaddr=$(ifconfig $intf | grep 'inet[^6]' | awk '{print $2}')
 
       echo "Configuring Cassandra Instance $i ($intf : $ipaddr)..."
@@ -711,6 +719,7 @@ write_files:
     #!/bin/bash
 
     # External Variables
+    intf_prefix="eth"
     throughput="200"
     instances="3"
 
@@ -719,8 +728,9 @@ write_files:
     $0 [options]
 
     Options:
-    --instances  number  The number of Cassandra instances to run on this server [default: $instances]
-    --throughput number  The desired throughput in Mbps [default: $throughput]
+    --intf_prefix string  The interface prefix (assuming consecutive order) [default: $intf_prefix]
+    --instances   number  The number of Cassandra instances to run on this server [default: $instances]
+    --throughput  number  The desired throughput in Mbps [default: $throughput]
     EOF
       exit
     fi
@@ -735,14 +745,14 @@ write_files:
     done
 
     re='^[0-9]+$'
-    available=$(ip a | grep "^[0-9]: eth" | wc -l)
+    available=$(ip a | grep "^[0-9]: $intf_prefix" | wc -l)
     if ! [[ $instances =~ $re ]] || [[ $instances > $available ]] || [[ $instances < 1 ]]; then
       echo "Error: please provide a number of instances between 1 and $available"
       exit 1
     fi
 
     for i in $(seq 1 $instances); do
-      intf="eth$(expr $i - 1)"
+      intf="$intf_prefix$(expr $i - 1)"
       ipaddr=$(ifconfig $intf | grep 'inet[^6]' | awk '{print $2}')
       nodetool -u cassandra -pw cassandra -h $ipaddr -p 7$${i}99 setstreamthroughput -- $throughput
     done
@@ -754,6 +764,7 @@ write_files:
     #!/bin/bash
 
     # External Variables
+    intf_prefix="eth"
     instance=""
 
     if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
@@ -761,7 +772,8 @@ write_files:
     $0 [options] [nodetool commands and arguments]
 
     Options:
-    --instance  number  The ID of the target Cassandra instance to use with the nodetool command
+    --intf_prefix string  The interface prefix (assuming consecutive order) [default: $intf_prefix]
+    --instance    number  The ID of the target Cassandra instance to use with the nodetool command
 
     Examples:
     $0 --instance 1 status
@@ -779,13 +791,13 @@ write_files:
     shift
 
     re='^[0-9]+$'
-    available=$(ip a | grep "^[0-9]: eth" | wc -l)
+    available=$(ip a | grep "^[0-9]: $intf_prefix" | wc -l)
     if ! [[ $instance =~ $re ]] || [[ $instance > $available ]] || [[ $instance < 1 ]]; then
       echo "Error: please provide an instance number between 1 and $available"
       exit 1
     fi
 
-    intf="eth$(expr $instance - 1)"
+    intf="$intf_prefix$(expr $instance - 1)"
     ipaddr=$(ifconfig $intf | grep 'inet[^6]' | awk '{print $2}')
 
     echo "Instance $instance"
