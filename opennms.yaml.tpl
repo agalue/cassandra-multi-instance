@@ -144,6 +144,12 @@ write_files:
     acknowledged-at=Mon Jan 01 00\:00\:00 EDT 2021
 
 - owner: root:root
+  path: /opt/opennms-etc-overlay/opennms.properties.d/web.properties
+  content: |
+    org.opennms.web.defaultGraphPeriod=last_2_hour
+    org.opennms.security.disableLoginSuccessEvent=true
+
+- owner: root:root
   path: /opt/opennms-etc-overlay/opennms.properties.d/rrd.properties
   content: |
     org.opennms.rrd.storeByGroup=true
