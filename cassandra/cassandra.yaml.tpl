@@ -421,12 +421,13 @@ write_files:
 
     echo "Configuring Cassandra Data Disks..."
     for i in $(seq 1 $instances); do
-      disk=$(readlink -f /dev/disk/azure/scsi1/lun$(expr $i - 1))
-      dev=$${disk}1
+      disk=/dev/disk/azure/scsi1/lun$(expr $i - 1)
+      dev=$disk-part1
+      label=LUN$i
       mount_point=/data/node$i
 
       echo "Waiting for $disk to be ready"
-      while [ ! -e $disk ]; do
+      while [ ! -e $(readlink -f $disk) ]; do
         printf '.'
         sleep 10
       done
@@ -437,15 +438,15 @@ write_files:
       else
         echo "Formatting $disk (disk $i)"
         echo ';' | sfdisk $disk
-        mkfs -t xfs -f $dev
+        mkfs -t xfs -L $label -f $dev
       fi
 
       mkdir -p $mount_point
-      if grep -qs $mount_point /proc/mounts; then
-        echo "$dev (disk $i) already mounted at $mount_point"
+      if grep -qs $label /proc/mounts; then
+        echo "$dev (label $label) already mounted at $mount_point"
       else
         echo "Mounting $dev (disk $i) at $mount_point"
-        echo "$dev $mount_point xfs defaults,noatime 0 0" >> /etc/fstab
+        echo "LABEL=$label $mount_point xfs defaults,noatime 0 0" >> /etc/fstab
         mount $mount_point
       fi
 
@@ -711,51 +712,6 @@ write_files:
     # Finish
     systemctl mask cassandra
     touch /etc/cassandra/.configured
-
-- owner: root:root
-  permissions: '0755'
-  path: /etc/cassandra/set_compaction_throughput.sh
-  content: |
-    #!/bin/bash
-
-    # External Variables
-    intf_prefix="eth"
-    throughput="200"
-    instances="3"
-
-    if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
-      cat <<EOF
-    $0 [options]
-
-    Options:
-    --intf_prefix string  The interface prefix (assuming consecutive order) [default: $intf_prefix]
-    --instances   number  The number of Cassandra instances to run on this server [default: $instances]
-    --throughput  number  The desired throughput in Mbps [default: $throughput]
-    EOF
-      exit
-    fi
-
-    # Parse external variables
-    while [ $# -gt 0 ]; do
-      if [[ $1 == *"--"* ]]; then
-        param="$${1/--/}"
-        declare $param="$2"
-      fi
-      shift
-    done
-
-    re='^[0-9]+$'
-    available=$(ip a | grep "^[0-9]: $intf_prefix" | wc -l)
-    if ! [[ $instances =~ $re ]] || [[ $instances > $available ]] || [[ $instances < 1 ]]; then
-      echo "Error: please provide a number of instances between 1 and $available"
-      exit 1
-    fi
-
-    for i in $(seq 1 $instances); do
-      intf="$intf_prefix$(expr $i - 1)"
-      ipaddr=$(ifconfig $intf | grep 'inet[^6]' | awk '{print $2}')
-      nodetool -u cassandra -pw cassandra -h $ipaddr -p 7$${i}99 setstreamthroughput -- $throughput
-    done
 
 - owner: root:root
   permissions: '0755'
