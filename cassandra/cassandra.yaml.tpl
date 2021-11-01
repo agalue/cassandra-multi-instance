@@ -426,23 +426,27 @@ write_files:
       label=LUN$i
       mount_point=/data/node$i
 
-      echo "Waiting for $disk to be ready"
-      while [ ! -e $(readlink -f $disk) ]; do
-        printf '.'
-        sleep 10
-      done
-
       if [ -e $dev ]; then
         # This script was designed to be executed once per disk device
         echo "Device $dev (disk $i) already configured and formatted"
       else
+        echo "Waiting for $disk to be ready"
+        while [ ! -e $(readlink -f $disk) ]; do
+          printf '.'
+          sleep 10
+        done
         echo "Formatting $disk (disk $i)"
         echo ';' | sfdisk $disk
+        echo "Waiting for $dev to be ready"
+        while [ ! -e $(readlink -f $dev) ]; do
+          printf '.'
+          sleep 1
+        done
         mkfs -t xfs -L $label -f $dev
       fi
 
       mkdir -p $mount_point
-      if grep -qs $label /proc/mounts; then
+      if grep -qs "LABEL=$label" /etc/fstab; then
         echo "$dev (label $label) already mounted at $mount_point"
       else
         echo "Mounting $dev (disk $i) at $mount_point"
@@ -532,9 +536,8 @@ write_files:
     rsyslog_file=/etc/rsyslog.d/cassandra.conf
     rm -f $rsyslog_file
     for i in $(seq 1 $instances); do
-      id=cassandra-node$i
       log=/var/log/cassandra/node$i/cassandra.log
-      echo "if \$programname == '$id' then $log" >> $rsyslog_file
+      echo "if \$programname == 'cassandra-node$i' then $log" >> $rsyslog_file
     done
 
     systemctl restart rsyslog
