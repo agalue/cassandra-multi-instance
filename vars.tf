@@ -1,6 +1,6 @@
 
 variable "user" {
-  description = "The user to access VMs and name prefix for Azure resources."
+  description = "The username to access VMs, and the value for the Owner tag."
   type        = string
   default     = "agalue"
 }
