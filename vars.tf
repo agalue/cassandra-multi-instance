@@ -1,3 +1,4 @@
+# Author: Alejandro Galue <agalue@opennms.org>
 
 variable "user" {
   description = "The username to access VMs, and the value for the Owner tag."

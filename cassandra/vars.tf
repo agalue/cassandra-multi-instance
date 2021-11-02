@@ -1,3 +1,4 @@
+# Author: Alejandro Galue <agalue@opennms.org>
 
 variable "resource_group" {
   type = string

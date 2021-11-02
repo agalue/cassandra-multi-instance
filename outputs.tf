@@ -1,3 +1,5 @@
+# Author: Alejandro Galue <agalue@opennms.org>
+
 output "cassandra_ipaddresses" {
   value = module.cassandra.*.ip_addresses
 }

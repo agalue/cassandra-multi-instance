@@ -1,3 +1,4 @@
+# Author: Alejandro Galue <agalue@opennms.org>
 
 resource "azurerm_public_ip" "cassandra" {
   name                = "${var.hostname}-public-ip"

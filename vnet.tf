@@ -1,3 +1,5 @@
+# Author: Alejandro Galue <agalue@opennms.org>
+
 locals {
   # To guarantee the existence of the group if it has to be created 
   resource_group = var.resource_group_create ? azurerm_resource_group.main[0].name : var.resource_group

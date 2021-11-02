@@ -1,3 +1,5 @@
+# Author: Alejandro Galue <agalue@opennms.org>
+
 # To guarantee 4 NICs and 4 Disks per Cassandra VM
 subnets = [
   "14.0.1.0/24",

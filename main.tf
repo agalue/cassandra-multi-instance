@@ -1,3 +1,4 @@
+# Author: Alejandro Galue <agalue@opennms.org>
 
 locals {
   seed_node = cidrhost(azurerm_subnet.main[0].address_prefixes[0], 11) # First instance on first VM
