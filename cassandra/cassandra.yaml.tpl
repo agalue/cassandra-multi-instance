@@ -73,6 +73,7 @@ write_files:
     WantedBy=multi-user.target
 
 - owner: root:root
+  permissions: '0755'
   path: /etc/cassandra/current-resource-shard.py
   content: |
     #!/usr/bin/env python
@@ -163,6 +164,67 @@ write_files:
     );
 
 - owner: root:root
+  permissions: '0755'
+  path: /etc/cassandra/verify-partitions.sh
+  content: |
+    #!/bin/bash
+
+    # Global variables overridable via external parameters
+    keyspace="${keyspace}"
+    total="20"
+
+    if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+      cat <<EOF
+    $0 [options]
+
+    Options:
+    --keyspace  string  The name of the keyspace [default: $keyspace]
+    --total     number  The total number of fake nodes to check: $total]
+    EOF
+      exit
+    fi
+
+    # Parse external variables
+    while [ $# -gt 0 ]; do
+      if [[ $1 == *"--"* ]]; then
+        param="$${1/--/}"
+        declare $param="$2"
+      fi
+      shift
+    done
+
+    shard=$(/etc/cassandra/current-resource-shard.py)
+    cmd="nodetool -u cassandra -pw cassandra getendpoints"
+
+    resources=(
+      ucd-sysstat
+      mib-tcp
+      eth0\\:mib2-X-interfaces
+      eth1\\:mib2-X-interfaces
+      diskIOIndex\\:sda\\:ucd-diskio-load
+    )
+
+    rf=$(cqlsh --no-color $(hostname) \
+      -e "SELECT * FROM system_schema.keyspaces;" | \
+      grep $keyspace | awk -F '|' '{print $3}' | \
+      sed "s/'/\"/g" | jq -r ".replication_factor")
+
+    echo "Keyspace $keyspace (RF=$rf)"
+    echo "If the first number of the octet is the same, all replicas live in the same node"
+    for n in $(seq 1 $total); do
+      for r in $${resources[@]};; do
+        partition=G:$shard:snmp\\:$n\\:$r
+        output=$($cmd -- $keyspace samples $partition)
+        data=()
+        for ip in $${output[@]}; do
+          IFS='.' read -r -a octets <<< "$ip"
+          data+=($${octets[3]})
+        done
+        echo "Partition = $partition, IP Octets = $${data[@]}"
+      done
+    done
+
+- owner: root:root
   permissions: '0750'
   path: /etc/cassandra/bootstrap.sh
   content: |
@@ -238,7 +300,7 @@ write_files:
     systemctl mask cassandra
     systemctl daemon-reload
 
-    echo "Bootstrapping Cassandra..."
+    echo "Bootstrapping Cassandra Instances..."
 
     j=$(hostname | awk '{ print substr($0,length,1) }')
 
@@ -252,9 +314,10 @@ write_files:
       if [[ "$j" == "1" ]] && [[ "$i" == "1" ]]; then
 
         # Processing seed node (the first instance of the first server)
+        echo "$(date) - Starting Cassandra Seed Node"
         systemctl enable --now cassandra3@node$i
         wait_for_seed
-        echo "Configuring keyspaces..."
+        echo "$(date) - Configuring keyspaces..."
         if [[ "$snitch" == "SimpleSnitch" ]]; then
           cqlsh -f /etc/cassandra/newts_keyspace.cql $(hostname)
         else
@@ -271,15 +334,15 @@ write_files:
           required_instances=$(($instances*($j-1) + ($i-1)))
         fi
         running_instances=$(get_running_instances)
-        echo "Starting instance $i from server $j..."
-        echo "Waiting to have $required_instances running..."
+        echo "$(date) - Initializing Cassandra instance $i from server $j..."
+        echo "$(date) - Waiting to have $required_instances running..."
         until [[ $required_instances == $running_instances ]]; do
           printf '.'
           sleep 10;
           running_instances=$(get_running_instances)
         done
         echo "done"
-        echo "Starting cassandra..."
+        echo "$(date) - Starting Cassandra instance $i from server $j..."
         systemctl enable --now cassandra3@node$i
       fi
 

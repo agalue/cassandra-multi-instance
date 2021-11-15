@@ -466,6 +466,7 @@ write_files:
 
     echo "Starting OpenNMS"
     /opt/opennms/bin/runjava -s
+    RUNAS=opennms /opt/opennms/bin/fix-permissions
     /opt/opennms/bin/install -dis
     systemctl --now enable opennms
 
@@ -484,7 +485,7 @@ write_files:
     req=/tmp/Infrastructure.xml
     cat <<EOF > $req
     <model-import xmlns="http://xmlns.opennms.org/xsd/config/model-import" date-stamp="2018-04-01T11:00:00.000-04:00" foreign-source="Infrastructure">
-      <node building="us-east-2" foreign-id="opennms" node-label="opennms-server">
+      <node building="${location}" foreign-id="opennms" node-label="opennms-server">
         <interface descr="eth0" ip-addr="$ipaddr" status="1" snmp-primary="P">
           <monitored-service service-name="ICMP"/>
           <monitored-service service-name="SNMP"/>
@@ -498,7 +499,7 @@ write_files:
 
     for i in $(seq 1 $servers); do
       cat <<EOF >> $req
-      <node foreign-id="cassandra$i" node-label="cassandra$i">
+      <node building="${location}" foreign-id="cassandra$i" node-label="cassandra$i">
     EOF
 
       intf=1
