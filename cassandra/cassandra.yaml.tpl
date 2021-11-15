@@ -170,7 +170,7 @@ write_files:
     #!/bin/bash
 
     # Global variables overridable via external parameters
-    keyspace="${keyspace}"
+    keyspace="${newts_keyspace}"
     total="20"
 
     if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
