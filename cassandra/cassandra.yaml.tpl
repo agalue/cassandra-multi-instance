@@ -204,13 +204,8 @@ write_files:
       diskIOIndex\\:sda\\:ucd-diskio-load
     )
 
-    rf=$(cqlsh --no-color $(hostname) \
-      -e "SELECT * FROM system_schema.keyspaces;" | \
-      grep $keyspace | awk -F '|' '{print $3}' | \
-      sed "s/'/\"/g" | jq -r ".replication_factor")
-
-    echo "Keyspace $keyspace (RF=$rf)"
-    echo "If the first number of the octet is the same, all replicas live in the same node"
+    echo "If the first digit of the last octet from the IP address is the same, all replicas live in the same physical server."
+    echo "The number of octets refers to the replication factor for the chosen keyspace."
     for n in $(seq 1 $total); do
       for r in $${resources[@]}; do
         partition=G:$shard:snmp\\:$n\\:$r
@@ -220,7 +215,7 @@ write_files:
           IFS='.' read -r -a octets <<< "$ip"
           data+=($${octets[3]})
         done
-        echo "Partition = $partition, IP Octets = $${data[@]}"
+        echo "Partition = $partition, Last IP Octet = $${data[@]}"
       done
     done
 
