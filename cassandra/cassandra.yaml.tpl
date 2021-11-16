@@ -655,7 +655,7 @@ write_files:
     # Alternatively, you can use the hostname as the rack name
     function get_rack {
       index=$(hostname | awk '{ print substr($0,length,1) }')
-      return "Rack$index"
+      echo "Rack$index"
     }
 
     if [ -f "/etc/cassandra/.configured" ]; then
