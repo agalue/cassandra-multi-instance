@@ -72,7 +72,7 @@ variable "address_space" {
 variable "subnets" {
   description = "The subnet ranges for each Cassandra instance; the size determines the number of NICs per VM (cannot have more than 8 elements)"
   type        = list(string)
-  default     = [
+  default = [
     "14.0.1.0/24",
     "14.0.2.0/24",
     "14.0.3.0/24",
@@ -133,20 +133,20 @@ variable "cassandra_settings" {
     expired_sstable_check  = number
     gc_grace_seconds       = number
   })
-  default ={
-    version                = "latest" # Either 'latest' or '4.0.1', '3.11.10', and so on (avoid 3.11.11).
-    disk_size              = 100 # Disk size in GB per Cassandra Instance
-    cluster_name           = "OpenNMS"
-    dc_name                = "Main" # Valid when using GossipingPropertyFileSnitch
-    endpoint_snitch        = "GossipingPropertyFileSnitch" # Either GossipingPropertyFileSnitch or SimpleSnitch
-    dynamic_snitch         = false
-    num_tokens             = 16
-    replication_factor     = 2
-    newts_keyspace         = "newts"
+  default = {
+    version            = "latest" # Either 'latest' or '4.0.1', '3.11.10', and so on (avoid 3.11.11).
+    disk_size          = 100      # Disk size in GB per Cassandra Instance
+    cluster_name       = "OpenNMS"
+    dc_name            = "Main"                        # Valid when using GossipingPropertyFileSnitch
+    endpoint_snitch    = "GossipingPropertyFileSnitch" # Either GossipingPropertyFileSnitch or SimpleSnitch
+    dynamic_snitch     = false
+    num_tokens         = 16
+    replication_factor = 2
+    newts_keyspace     = "newts"
     # TWCS settings for the newts.samples table
     compaction_window_size = 7
     compaction_window_unit = "DAYS"
-    expired_sstable_check  = 86400 # Expressed in seconds
+    expired_sstable_check  = 86400  # Expressed in seconds
     gc_grace_seconds       = 604800 # Expressed in seconds
   }
 }
@@ -159,7 +159,7 @@ variable "opennms_settings" {
     ring_buffer_size     = number
     cache_max_entries    = number
   })
-  default ={
+  default = {
     newts_ttl            = 31540000
     newts_resource_shard = 604800
     ring_buffer_size     = 2097152

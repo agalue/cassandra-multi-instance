@@ -12,7 +12,7 @@ resource "azurerm_public_ip" "cassandra" {
 
 resource "azurerm_network_interface" "cassandra" {
   count               = length(var.subnet_cidrs)
-  name                = "${var.hostname}-nic${count.index+1}"
+  name                = "${var.hostname}-nic${count.index + 1}"
   location            = var.location
   resource_group_name = var.resource_group
   tags                = var.required_tags
@@ -27,7 +27,7 @@ resource "azurerm_network_interface" "cassandra" {
 }
 
 resource "azurerm_network_interface_security_group_association" "cassandra" {
-  count                    = length(var.subnet_cidrs)
+  count                     = length(var.subnet_cidrs)
   network_interface_id      = azurerm_network_interface.cassandra[count.index].id
   network_security_group_id = var.nsg_id
 }
@@ -101,7 +101,7 @@ resource "azurerm_linux_virtual_machine" "cassandra" {
 
 resource "azurerm_managed_disk" "cassandra" {
   count                = length(var.subnet_cidrs)
-  name                 = "${var.hostname}-disk${count.index+1}"
+  name                 = "${var.hostname}-disk${count.index + 1}"
   resource_group_name  = var.resource_group
   tags                 = var.required_tags
   location             = var.location
@@ -114,6 +114,6 @@ resource "azurerm_virtual_machine_data_disk_attachment" "cassandra" {
   count              = length(var.subnet_cidrs)
   managed_disk_id    = azurerm_managed_disk.cassandra[count.index].id
   virtual_machine_id = azurerm_linux_virtual_machine.cassandra.id
-  lun                = "${count.index}"
+  lun                = count.index
   caching            = "ReadWrite"
 }

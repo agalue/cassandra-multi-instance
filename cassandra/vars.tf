@@ -9,11 +9,11 @@ variable "location" {
 }
 
 variable "subnet_ids" {
-  type    = list(string)
+  type = list(string)
 }
 
 variable "subnet_cidrs" {
-  type    = list(string)
+  type = list(string)
 }
 
 variable "nsg_id" {

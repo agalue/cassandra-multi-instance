@@ -1,7 +1,7 @@
 # Author: Alejandro Galue <agalue@opennms.org>
 
 locals {
-  seed_node = cidrhost(azurerm_subnet.main[0].address_prefixes[0], 11) # First instance on first VM
+  seed_node    = cidrhost(azurerm_subnet.main[0].address_prefixes[0], 11) # First instance on first VM
   onms_vm_name = "${var.name_prefix}-onmscas1"
   required_tags = {
     Owner = "${var.user}"
@@ -65,7 +65,7 @@ data "template_file" "opennms" {
     user                 = var.user
     location             = var.location
     cassandra_seed       = local.seed_node
-    cassandra_addresses  = join(",", flatten([for instance in module.cassandra: instance.ip_addresses]))
+    cassandra_addresses  = join(",", flatten([for instance in module.cassandra : instance.ip_addresses]))
     cassandra_vms        = var.num_vms
     cassandra_instances  = var.num_instances
     newts_keyspace       = var.cassandra_settings.newts_keyspace

@@ -8,10 +8,10 @@ subnets = [
   "14.0.4.0/24",
 ]
 
-user = "agalue"
-name_prefix = "ag-env1"
-num_vms = 3
-num_instances=3
+user          = "agalue"
+name_prefix   = "ag-env1"
+num_vms       = 3
+num_instances = 3
 
 vm_size = {
   cassandra = "Standard_D48s_v4" # 48 Cores and 192 GB of RAM
