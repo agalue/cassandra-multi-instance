@@ -212,7 +212,7 @@ write_files:
     echo "Keyspace $keyspace (RF=$rf)"
     echo "If the first number of the octet is the same, all replicas live in the same node"
     for n in $(seq 1 $total); do
-      for r in $${resources[@]};; do
+      for r in $${resources[@]}; do
         partition=G:$shard:snmp\\:$n\\:$r
         output=$($cmd -- $keyspace samples $partition)
         data=()
