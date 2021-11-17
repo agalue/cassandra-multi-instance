@@ -610,6 +610,7 @@ write_files:
     # Global variables overridable via external parameters
     intf_prefix="eth"
     intf_offset="1"
+    use_ipaddr="false"
     cluster_name="OpenNMS Cluster"
     snitch="GossipingPropertyFileSnitch"
     dynamic_snitch="true"
@@ -625,6 +626,7 @@ write_files:
     Options:
     --intf_prefix    string  The interface prefix (assuming consecutive order) [default: $intf_prefix]
     --intf_offset    number  An offset to enumerate interfaces: 0 -> eth1, eth2, eth3, 1 -> for eth0, eth1, eth3; [default: $intf_offset]
+    --use_ipaddr     bool    true to use IP address instead of interface name for the listeners [default $use_ipaddr]
     --instances      number  The number of Cassandra instances to run on this server [default: $instances]
     --cluster_name   string  The name of the Cassandra cluster [default: $cluster_name]
                              Must be the same for all its members
@@ -702,10 +704,15 @@ write_files:
       # Apply Basic Configuration
       sed -r -i "/cluster_name/s/: '.*'/: $cluster_name/" $conf_file
       sed -r -i "/seeds:/s/127.0.0.1/$seed_host/" $conf_file
-      sed -r -i "s/^listen_address/#listen_address/" $conf_file
-      sed -r -i "s/^rpc_address/#rpc_address/" $conf_file
-      sed -r -i "s/^# listen_interface: .*/listen_interface: $intf/" $conf_file
-      sed -r -i "s/^# rpc_interface: .*/rpc_interface: $intf/" $conf_file
+      if [[ "$use_ipaddr" == "true" ]]; then
+        sed -r -i "/^listen_address/s/:.*/: $ipaddr/" $conf_file
+        sed -r -i "/^rpc_address/s/:.*/: $ipaddr/" $conf_file
+      else
+        sed -r -i "s/^listen_address/#listen_address/" $conf_file
+        sed -r -i "s/^rpc_address/#rpc_address/" $conf_file
+        sed -r -i "s/^# listen_interface: .*/listen_interface: $intf/" $conf_file
+        sed -r -i "s/^# rpc_interface: .*/rpc_interface: $intf/" $conf_file
+      fi
       sed -r -i "/^endpoint_snitch/s/: .*/: $snitch/" $conf_file
       sed -r -i "/^endpoint_snitch:/a dynamic_snitch: $dynamic_snitch" $conf_file
       sed -r -i "s|hints_directory: .*|hints_directory: $data_dir/hints|" $conf_file
