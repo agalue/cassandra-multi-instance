@@ -13,3 +13,7 @@ output "interfaces" {
     intf.name
   ]
 }
+
+output "fqdn" {
+  value = azurerm_public_ip.cassandra.fqdn
+}
