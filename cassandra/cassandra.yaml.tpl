@@ -609,6 +609,7 @@ write_files:
 
     # Global variables overridable via external parameters
     intf_prefix="eth"
+    intf_offset="1"
     cluster_name="OpenNMS Cluster"
     snitch="GossipingPropertyFileSnitch"
     dynamic_snitch="true"
@@ -623,6 +624,7 @@ write_files:
 
     Options:
     --intf_prefix    string  The interface prefix (assuming consecutive order) [default: $intf_prefix]
+    --intf_offset    number  An offset to enumerate interfaces: 0 -> eth1, eth2, eth3, 1 -> for eth0, eth1, eth3; [default: $intf_offset]
     --instances      number  The number of Cassandra instances to run on this server [default: $instances]
     --cluster_name   string  The name of the Cassandra cluster [default: $cluster_name]
                              Must be the same for all its members
@@ -689,7 +691,7 @@ write_files:
       jvm_file=$conf_dir/jvm.options
       log_file=$conf_dir/logback.xml
       rackdc_file=$conf_dir/cassandra-rackdc.properties
-      intf="$intf_prefix$(expr $i - 1)"
+      intf="$intf_prefix$(expr $i - $intf_offset)"
       ipaddr=$(ifconfig $intf | grep 'inet[^6]' | awk '{print $2}')
 
       echo "Configuring Cassandra Instance $i ($intf : $ipaddr)..."
@@ -783,6 +785,7 @@ write_files:
 
     # External Variables
     intf_prefix="eth"
+    intf_offset="1"
     instance=""
 
     if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
@@ -791,6 +794,7 @@ write_files:
 
     Options:
     --intf_prefix string  The interface prefix (assuming consecutive order) [default: $intf_prefix]
+    --intf_offset number  An offset to enumerate interfaces: 0 -> eth1, eth2, eth3, 1 -> for eth0, eth1, eth3; [default: $intf_offset]
     --instance    number  The ID of the target Cassandra instance to use with the nodetool command
 
     Examples:
@@ -815,7 +819,7 @@ write_files:
       exit 1
     fi
 
-    intf="$intf_prefix$(expr $instance - 1)"
+    intf="$intf_prefix$(expr $instance - $intf_offset)"
     ipaddr=$(ifconfig $intf | grep 'inet[^6]' | awk '{print $2}')
 
     echo "Instance $instance"
