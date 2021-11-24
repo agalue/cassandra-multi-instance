@@ -41,6 +41,7 @@ data "template_file" "cassandra" {
     seed_host              = var.seed_host
     version                = var.settings.version
     cluster_name           = var.settings.cluster_name
+    use_ipaddr             = var.settings.use_ipaddr
     dc_name                = var.settings.dc_name
     endpoint_snitch        = var.settings.endpoint_snitch
     dynamic_snitch         = var.settings.dynamic_snitch

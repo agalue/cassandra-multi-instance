@@ -122,6 +122,7 @@ variable "cassandra_settings" {
     version                = string
     disk_size              = number
     cluster_name           = string
+    use_ipaddr             = bool
     dc_name                = string
     endpoint_snitch        = string
     dynamic_snitch         = bool
@@ -137,6 +138,7 @@ variable "cassandra_settings" {
     version            = "latest" # Either 'latest' or '4.0.1', '3.11.10', and so on (avoid 3.11.11).
     disk_size          = 100      # Disk size in GB per Cassandra Instance
     cluster_name       = "OpenNMS"
+    use_ipaddr         = false    # false to use Interface Names for the Cassandra Listeners
     dc_name            = "Main"                        # Valid when using GossipingPropertyFileSnitch
     endpoint_snitch    = "GossipingPropertyFileSnitch" # Either GossipingPropertyFileSnitch or SimpleSnitch
     dynamic_snitch     = false

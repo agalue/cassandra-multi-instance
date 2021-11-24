@@ -66,6 +66,7 @@ variable "settings" {
     version                = string
     disk_size              = number
     cluster_name           = string
+    use_ipaddr             = bool
     dc_name                = string
     endpoint_snitch        = string
     dynamic_snitch         = bool

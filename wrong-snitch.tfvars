@@ -29,6 +29,7 @@ cassandra_settings = {
   version                = "3.11.6"
   disk_size              = 500
   cluster_name           = "Test Production Newts"
+  use_ipaddr             = true
   dc_name                = "datacenter1"
   endpoint_snitch        = "SimpleSnitch"
   dynamic_snitch         = true
