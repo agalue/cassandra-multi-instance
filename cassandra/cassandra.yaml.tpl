@@ -618,6 +618,7 @@ write_files:
     seed_host="127.0.0.1"
     dc_name="DC1"
     instances="3"
+    tmp_dir=""
 
     if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
       cat <<EOF
@@ -637,6 +638,7 @@ write_files:
     --dynamic_snitch bool    true to enable dynamic snitch, false otherwise [default: $dynamic_snitch]
     --seed_host      string  The IP address of the seed node [default: $seed_host]
     --dc_name        string  The name of the Datacenter to use when using NTS [default: $dc_name]
+    --tmp_dir        string  To override java.io.tmpdir for Cassandra
     EOF
       exit
     fi
@@ -769,6 +771,15 @@ write_files:
       for entry in "$${ToEnable[@]}"; do
         sed -r -i "/$entry/s/#-XX/-XX/" $jvm_file
       done
+
+      # Custom java.io.tmpdir
+      if [[ "$tmp_dir" != "" ]]; then
+        echo "" >> $jvm_file
+        echo "### Custom Temporary directory" >> $jvm_file
+        echo "-Djava.io.tmpdir=$tmp_dir" >> $jvm_file
+        mkdir -p $tmp_dir
+        chown cassandra:cassandra $tmp_dir
+      fi
     done
 
     chown cassandra:cassandra /etc/cassandra/jmxremote.*
